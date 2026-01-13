@@ -3,6 +3,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/auth_scaffold.dart';
 import 'forgot_password_page.dart';
 import '../teacher/dashboard/dashboard_page.dart';
+import '../student/dashboard/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -161,10 +162,36 @@ class _LoginPageState extends State<LoginPage> {
             height: 52,
             child: ElevatedButton(
               onPressed: () {
+                // Hardcoded login logic untuk demo
+                final email = _emailController.text.trim().toLowerCase();
+                final password = _passwordController.text;
+                
+                Widget targetPage;
+                
+                // Teacher credentials
+                if (email == 'teacher@ababil.com' && password == 'teacher123') {
+                  targetPage = const TeacherDashboardPage();
+                }
+                // Student credentials  
+                else if (email == 'student@ababil.com' && password == 'student123') {
+                  targetPage = const StudentDashboardPage();
+                }
+                else {
+                  // Show error jika credentials salah
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Invalid email or password'),
+                      backgroundColor: Colors.redAccent,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const TeacherDashboardPage(),
+                    builder: (context) => targetPage,
                   ),
                 );
               },

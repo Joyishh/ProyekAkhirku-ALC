@@ -5,6 +5,10 @@ import '../../features/teacher/dashboard/dashboard_page.dart';
 import '../../features/teacher/classes/classes_page.dart';
 import '../../features/teacher/learningProgres/learning_progres_page.dart';
 import '../../features/teacher/schedule/schedule_page.dart';
+import '../../features/student/dashboard/dashboard_page.dart';
+import '../../features/student/classes/classes_page.dart';
+import '../../features/student/learningProgres/learining_progres_page.dart';
+import '../../features/student/schedule/schedule_page.dart';
 
 enum HeaderMode { overview, detail }
 
@@ -111,22 +115,17 @@ class MainLayout extends StatelessWidget {
   }
 
   Widget? _getStudentPage(int index) {
-    // TODO: Implement student pages
     switch (index) {
       case 0:
-        // return const StudentDashboardPage();
-        return null;
+        return const StudentDashboardPage();
       case 1:
-        // return const StudentCoursesPage();
-        return null;
+        return const StudentClassesPage();
       case 2:
-        // return const StudentProgressPage();
-        return null;
+        return const StudentLearningProgressPage();
       case 3:
-        // return const StudentSchedulePage();
-        return null;
+        return const StudentSchedulePage();
       case 4:
-        // return const StudentProfilePage();
+        // TODO: Implement Student Profile Page
         return null;
       default:
         return null;

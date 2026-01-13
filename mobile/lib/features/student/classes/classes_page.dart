@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../../../core/layout/main_layout.dart';
 
-class TeacherClassesPage extends StatelessWidget {
-  const TeacherClassesPage({super.key});
+class StudentClassesPage extends StatelessWidget {
+  const StudentClassesPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MainLayout(
-      userRole: UserRole.teacher,
+      userRole: UserRole.student,
       headerMode: HeaderMode.overview, 
       title: 'My Classes',
-      subtitle: 'Manage your assigned classes',
+      subtitle: 'Your enrolled classes',
       activeTab: 1,
 
       body: SingleChildScrollView(

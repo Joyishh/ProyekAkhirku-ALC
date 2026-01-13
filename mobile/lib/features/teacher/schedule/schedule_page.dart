@@ -7,6 +7,7 @@ class TeacherSchedulePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
+      userRole: UserRole.teacher,
       headerMode: HeaderMode.overview, 
       title: 'Schedule',
       subtitle: 'Track your upcoming schedules',

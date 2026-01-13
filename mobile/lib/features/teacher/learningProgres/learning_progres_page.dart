@@ -7,6 +7,7 @@ class TeacherLearningProgressPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MainLayout(
+      userRole: UserRole.teacher,
       headerMode: HeaderMode.overview, 
       title: 'Learning Progress',
       subtitle: 'Track student progress effectively',
