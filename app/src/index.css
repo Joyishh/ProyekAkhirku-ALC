@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+/* CUSTOM TOASTIFY STYLE */
+
+@media only screen and (max-width: 480px) {
+  .Toastify__toast-container {
+    width: auto !important;     /* Matikan width 100vw default */
+    left: 16px !important;      /* Beri jarak kiri */
+    right: 16px !important;     /* Beri jarak kanan */
+    top: 16px !important;       /* Beri jarak atas */
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;        /* Center toast */
+  }
+
+  /* 2. Atur Bentuk Toast Card */
+  .Toastify__toast {
+    width: 100% !important;
+    border-radius: 12px !important; /* Membuat sudut lebih tumpul (modern) */
+    margin-bottom: 12px !important; /* Jarak antar toast jika ada 2 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important; /* Shadow halus */
+  }
+}
+
+/* 3. (Opsional) Sesuaikan font agar konsisten dengan Tailwind */
+.Toastify__toast-body {
+  font-family: 'Inter', sans-serif; /* Sesuaikan dengan font aplikasimu */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500;
+}
