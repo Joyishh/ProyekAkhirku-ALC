@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'header.dart';
 import 'bottom_navbar.dart';
+import '../../features/teacher/dashboard/dashboard_page.dart';
+import '../../features/teacher/classes/classes_page.dart';
+import '../../features/teacher/learningProgres/learning_progres_page.dart';
+import '../../features/teacher/schedule/schedule_page.dart';
 
 enum HeaderMode { overview, detail }
+
+enum UserRole { teacher, student }
 
 class MainLayout extends StatelessWidget {
   final Widget body;
@@ -14,6 +20,7 @@ class MainLayout extends StatelessWidget {
   
   // Nav Props
   final int activeTab;
+  final UserRole userRole; // Tambahan untuk role-based navigation
 
   const MainLayout({
     super.key,
@@ -22,6 +29,7 @@ class MainLayout extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.activeTab,
+    this.userRole = UserRole.teacher, // Default teacher untuk backward compatibility
   });
 
   @override
@@ -53,11 +61,75 @@ class MainLayout extends StatelessWidget {
       bottomNavigationBar: BottomNavbar(
         currentIndex: activeTab,
         onTap: (index) {
-          // Logic navigasi sederhana
-          // Nanti bisa diganti dengan GoRouter atau logic navigasi lainnya
-          debugPrint("Navigasi ke tab: $index");
+          if (index == activeTab) return; // Jangan navigasi jika sudah di halaman yang sama
+          
+          final page = _getPageByRole(userRole, index);
+          if (page == null) {
+            debugPrint("Page untuk role $userRole dan index $index belum dibuat");
+            return;
+          }
+          
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => page,
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         },
       ),
     );
+  }
+
+  // Method untuk mendapatkan halaman berdasarkan role dan index
+  Widget? _getPageByRole(UserRole role, int index) {
+    switch (role) {
+      case UserRole.teacher:
+        return _getTeacherPage(index);
+      case UserRole.student:
+        return _getStudentPage(index);
+    }
+  }
+
+  Widget? _getTeacherPage(int index) {
+    switch (index) {
+      case 0:
+        return const TeacherDashboardPage();
+      case 1:
+        return const TeacherClassesPage();
+      case 2:
+        return const TeacherLearningProgressPage();
+      case 3:
+        return const TeacherSchedulePage();
+      case 4:
+        // TODO: Implement Teacher Profile Page
+        return null;
+      default:
+        return null;
+    }
+  }
+
+  Widget? _getStudentPage(int index) {
+    // TODO: Implement student pages
+    switch (index) {
+      case 0:
+        // return const StudentDashboardPage();
+        return null;
+      case 1:
+        // return const StudentCoursesPage();
+        return null;
+      case 2:
+        // return const StudentProgressPage();
+        return null;
+      case 3:
+        // return const StudentSchedulePage();
+        return null;
+      case 4:
+        // return const StudentProfilePage();
+        return null;
+      default:
+        return null;
+    }
   }
 }

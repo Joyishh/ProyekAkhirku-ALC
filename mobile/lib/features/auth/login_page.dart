@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/auth_scaffold.dart';
 import 'forgot_password_page.dart';
-import '../teacher/dashboard_page.dart';
+import '../teacher/dashboard/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
