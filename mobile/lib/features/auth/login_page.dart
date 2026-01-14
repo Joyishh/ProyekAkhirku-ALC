@@ -169,11 +169,11 @@ class _LoginPageState extends State<LoginPage> {
                 Widget targetPage;
                 
                 // Teacher credentials
-                if (email == 'teacher@ababil.com' && password == 'teacher123') {
+                if (email == 'teacher@example.com' && password == 'teacher') {
                   targetPage = const TeacherDashboardPage();
                 }
                 // Student credentials  
-                else if (email == 'student@ababil.com' && password == 'student123') {
+                else if (email == 'student@example.com' && password == 'student') {
                   targetPage = const StudentDashboardPage();
                 }
                 else {

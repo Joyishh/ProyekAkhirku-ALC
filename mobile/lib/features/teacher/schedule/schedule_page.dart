@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/layout/main_layout.dart';
+import 'package:companion_app/core/widgets/class_card.dart';
 
 class TeacherSchedulePage extends StatelessWidget {
   const TeacherSchedulePage({super.key});
@@ -8,7 +9,7 @@ class TeacherSchedulePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MainLayout(
       userRole: UserRole.teacher,
-      headerMode: HeaderMode.overview, 
+      headerMode: HeaderMode.overview,
       title: 'Schedule',
       subtitle: 'Track your upcoming schedules',
       activeTab: 3,
@@ -17,9 +18,64 @@ class TeacherSchedulePage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Container(height: 100, color: Colors.blue[100], child: const Center(child: Text("Module Statistic"))),
+            Container(
+              height: 100,
+              color: Colors.blue[100],
+              child: const Center(child: Text("Module Statistic")),
+            ),
             const SizedBox(height: 16),
-            Container(height: 300, color: Colors.orange[100], child: const Center(child: Text("Module Schedule"))),
+            Container(
+              child: const Center(
+                child: ClassCard(
+                  type: ClassCardType.schedule, // <-- Footer hilang
+                  title: 'Komputer',
+                  subtitle: 'Paket SD - SMP',
+                  days: 'Fri',
+                  time: '13:00 - 15:00',
+                  room: 'Lab A',
+                  totalStudents: '15 Students',
+                ),
+              ),
+            ),
+            Container(
+              child: const Center(
+                child: ClassCard(
+                  type: ClassCardType.schedule, // <-- Footer hilang
+                  title: 'Bahasa Inggris',
+                  subtitle: 'Paket SD - SMP',
+                  days: 'Fri',
+                  time: '13:00 - 15:00',
+                  room: 'Lab A',
+                  totalStudents: '15 Students',
+                ),
+              ),
+            ),
+            Container(
+              child: const Center(
+                child: ClassCard(
+                  type: ClassCardType.schedule, // <-- Footer hilang
+                  title: 'Matematika',
+                  subtitle: 'Paket SD - SMP',
+                  days: 'Fri',
+                  time: '13:00 - 15:00',
+                  room: 'Lab A',
+                  totalStudents: '15 Students',
+                ),
+              ),
+            ),
+            Container(
+              child: const Center(
+                child: ClassCard(
+                  type: ClassCardType.schedule, // <-- Footer hilang
+                  title: 'IPA Terpadu',
+                  subtitle: 'Paket SD - SMP',
+                  days: 'Fri',
+                  time: '13:00 - 15:00',
+                  room: 'Lab A',
+                  totalStudents: '15 Students',
+                ),
+              ),
+            ),
           ],
         ),
       ),
