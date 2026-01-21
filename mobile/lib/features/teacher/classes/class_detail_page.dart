@@ -4,6 +4,7 @@ import '../../../../core/layout/main_layout.dart';
 import '../../../../core/widgets/class_detail_info_card.dart';
 import '../../../../core/widgets/class_attendance_history.dart'; // Sesuaikan jika nama file beda
 import '../../../../core/widgets/class_student_list.dart'; // Ganti class_student_list.dart jika isinya cuma satu kartu
+import 'session_detail_page.dart';
 
 class TeacherClassDetailPage extends StatelessWidget {
   // Parameter data kelas
@@ -58,44 +59,109 @@ class TeacherClassDetailPage extends StatelessWidget {
                   subtitle: "12 Students recorded",
                   presentCount: 11,
                   absentCount: 1,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Mon, Jan 15',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
                 AttendanceHistoryItem(
                   date: "Sat, Jan 13",
                   subtitle: "12 Students recorded",
                   presentCount: 10,
                   absentCount: 2,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Sat, Jan 13',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
                 AttendanceHistoryItem(
                   date: "Mon, Jan 15",
                   subtitle: "12 Students recorded",
                   presentCount: 11,
                   absentCount: 1,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Mon, Jan 15',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
                 AttendanceHistoryItem(
                   date: "Sat, Jan 13",
                   subtitle: "12 Students recorded",
                   presentCount: 10,
                   absentCount: 2,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Sat, Jan 13',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
                 AttendanceHistoryItem(
                   date: "Mon, Jan 15",
                   subtitle: "12 Students recorded",
                   presentCount: 11,
                   absentCount: 1,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Mon, Jan 15',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
                 AttendanceHistoryItem(
                   date: "Sat, Jan 13",
                   subtitle: "12 Students recorded",
                   presentCount: 10,
                   absentCount: 2,
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => const SessionDetailPage(
+                              sessionDate: 'Sat, Jan 13',
+                              sessionName: 'Bahasa Inggris',
+                            ),
+                      ),
+                    );
+                  },
                 ),
-                
               ],
             ),
 
@@ -105,29 +171,32 @@ class TeacherClassDetailPage extends StatelessWidget {
             _buildSectionHeader(title: "Students (4)", showSort: true),
             const SizedBox(height: 12),
 
-            // List Siswa (Menggunakan ClassStudentCard yang baru)
-            // Tanpa parameter 'status' dan 'dateInfo' sesuai kesepakatan MVP
+            // Panggil Widget List Baru
             ClassStudentList(
-              name: "Sarah Johnson",
-              id: "STU001",
-              imageUrl: "https://i.pravatar.cc/150?img=1",
-              attendanceRate: 0.95, // Hijau (>90%)
-              onTap: () {},
+              students: [
+                ClassStudentData(
+                  name: "Sarah Johnson",
+                  id: "STU001",
+                  attendanceRate: 0.95,
+                ),
+                ClassStudentData(
+                  name: "Michael Brown",
+                  id: "STU002",
+                  attendanceRate: 0.87,
+                ),
+                ClassStudentData(
+                  name: "David Miller",
+                  id: "STU004",
+                  attendanceRate: 0.65, // Merah
+                ),
+                ClassStudentData(
+                  name: "Lisa Wong",
+                  id: "STU003",
+                  attendanceRate: 0.98,
+                ),
+              ],
             ),
-            ClassStudentList(
-              name: "Michael Brown",
-              id: "STU002",
-              imageUrl: "https://i.pravatar.cc/150?img=3",
-              attendanceRate: 0.87, // Oranye
-              onTap: () {},
-            ),
-            ClassStudentList(
-              name: "Lisa Wong",
-              id: "STU003",
-              imageUrl: "https://i.pravatar.cc/150?img=5",
-              attendanceRate: 0.70, // Merah (<75%)
-              onTap: () {},
-            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
