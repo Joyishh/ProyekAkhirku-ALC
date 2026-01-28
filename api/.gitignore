@@ -18,6 +18,7 @@ lerna-debug.log*
 
 # Coverage directory used by testing tools
 coverage/
+.vscode/*
 
 # Misc
 .DS_Store
