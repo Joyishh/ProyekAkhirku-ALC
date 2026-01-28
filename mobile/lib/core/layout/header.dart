@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../widgets/notification_modal.dart';
 
 class AppHeader extends StatelessWidget {
   final String title;
@@ -75,7 +76,7 @@ class AppHeader extends StatelessWidget {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.notifications_outlined, color: Colors.black54),
-                    onPressed: () {},
+                    onPressed: () => showNotificationModal(context),
                   ),
                 ),
                 Positioned(

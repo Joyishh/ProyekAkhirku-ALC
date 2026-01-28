@@ -1,4 +1,4 @@
-import 'package:companion_app/core/widgets/class_card.dart';
+import '../../../core/widgets/class_card.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/layout/main_layout.dart';
 import 'class_detail_page.dart';
@@ -19,11 +19,6 @@ class TeacherClassesPage extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Container(
-              height: 100,
-              color: Colors.blue[100],
-              child: const Center(child: Text("Module Statistic")),
-            ),
             const SizedBox(height: 16),
             Container(
               child: Center(

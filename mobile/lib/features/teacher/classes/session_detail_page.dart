@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/layout/main_layout.dart';
 import '../../../core/theme/app_colors.dart';
-
+import 'widgets/qr_scanner_screen.dart';
+import 'package:intl/intl.dart';
 
 enum AttendanceStatus { present, late, absent, excused }
 
@@ -128,6 +130,22 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
     });
   }
 
+  void _updateStudentAttendance(String studentId, AttendanceStatus status, String checkInTime) {
+    setState(() {
+      final index = _students.indexWhere((s) => s.studentId == studentId);
+      if (index != -1) {
+        _students[index].status = status;
+        _students[index] = StudentAttendance(
+          id: _students[index].id,
+          name: _students[index].name,
+          studentId: _students[index].studentId,
+          checkInTime: checkInTime,
+          status: status,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MainLayout(
@@ -155,41 +173,122 @@ class _SessionDetailPageState extends State<SessionDetailPage> {
                 // Section 2: Student List
                 _buildStudentList(),
                 
-                // Extra padding for FAB
-                const SizedBox(height: 80),
-              ],
-            ),
-          ),
-          
-          // Floating Action Button for QR Scanner
-          Positioned(
-            right: 24,
-            bottom: 24,
-            child: FloatingActionButton(
-              onPressed: () => _openQRScanner(context),
-              backgroundColor: AppColors.primary,
-              elevation: 4,
-              child: const Icon(
-                Icons.qr_code_scanner,
-                color: Colors.white,
-                size: 28,
-              ),
-            ),
-          ),
+          // Extra padding for FAB
+          const SizedBox(height: 80),
         ],
       ),
-    );
-  }
-  
-  void _openQRScanner(BuildContext context) {
-    // TODO: Implement QR Scanner functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('QR Scanner akan segera diimplementasikan'),
-        duration: Duration(seconds: 2),
+    ),
+    
+    // Floating Action Button for QR Scanner
+    Positioned(
+      right: 24,
+      bottom: 24,
+      child: FloatingActionButton(
+        onPressed: () => _openQRScanner(context),
+        backgroundColor: AppColors.primary,
+        elevation: 4,
+        child: const Icon(
+          Icons.qr_code_scanner,
+          color: Colors.white,
+          size: 28,
+        ),
       ),
-    );
-  }
+    ),
+  ],
+),
+);
+}
+
+void _openQRScanner(BuildContext context) async {
+await Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => QRScannerScreen(
+      onCodeScanned: (scannedCode) {
+        _handleScannedCode(context, scannedCode);
+      },
+    ),
+  ),
+);
+}
+
+void _handleScannedCode(BuildContext context, String scannedCode) {
+// Vibrate on scan
+HapticFeedback.mediumImpact();
+
+// Find student by student ID
+final studentIndex = _students.indexWhere((s) => s.studentId == scannedCode);
+
+if (studentIndex == -1) {
+  // Student not found
+  _showScanFeedback(
+    context,
+    icon: Icons.error_outline,
+    message: 'Student ID not found',
+    color: Colors.red,
+  );
+  return;
+}
+
+final student = _students[studentIndex];
+
+// Check if already marked as present
+if (student.status == AttendanceStatus.present) {
+  _showScanFeedback(
+    context,
+    icon: Icons.info_outline,
+    message: '${student.name} already marked',
+    color: Colors.orange,
+  );
+  return;
+}
+
+// Mark as present with current time
+final currentTime = DateFormat('HH:mm').format(DateTime.now());
+_updateStudentAttendance(scannedCode, AttendanceStatus.present, currentTime);
+
+// Show success feedback
+_showScanFeedback(
+  context,
+  icon: Icons.check_circle,
+  message: '${student.name} marked as Present',
+  color: const Color(0xFF22C55E),
+);
+}
+
+void _showScanFeedback(
+BuildContext context, {
+required IconData icon,
+required String message,
+required Color color,
+}) {
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Row(
+      children: [
+        Icon(icon, color: Colors.white),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            message,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    ),
+    backgroundColor: color,
+    behavior: SnackBarBehavior.floating,
+    duration: const Duration(seconds: 2),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    margin: const EdgeInsets.all(16),
+  ),
+);
+}
 
   Widget _buildSummarySection() {
     return SingleChildScrollView(

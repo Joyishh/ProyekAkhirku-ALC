@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/layout/main_layout.dart';
+import '../../../core/layout/main_layout.dart';
+import 'widgets/dashboard_kpi.dart';
+import 'widgets/dashboard_today_classes.dart';
 
 class TeacherDashboardPage extends StatelessWidget {
   const TeacherDashboardPage({super.key});
@@ -8,18 +10,27 @@ class TeacherDashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MainLayout(
       userRole: UserRole.teacher,
-      headerMode: HeaderMode.overview, 
+      headerMode: HeaderMode.overview,
       title: 'Bayu Ramadany',
       subtitle: 'Welcome back!',
       activeTab: 0,
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: 100, color: Colors.blue[100], child: const Center(child: Text("Module Statistic"))),
-            const SizedBox(height: 16),
-            Container(height: 300, color: Colors.orange[100], child: const Center(child: Text("Module Jadwal"))),
+            // KPI Cards Section
+            const DashboardKPI(),
+
+            const SizedBox(height: 24),
+
+            // Today's Classes Section
+            DashboardTodayClasses(
+              onAttendanceTap: () {
+                // TODO: Navigate to attendance page
+                debugPrint('Attendance tapped');
+              },
+            ),
           ],
         ),
       ),

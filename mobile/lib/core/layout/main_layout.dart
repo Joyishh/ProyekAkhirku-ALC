@@ -3,7 +3,7 @@ import 'header.dart';
 import 'bottom_navbar.dart';
 import '../../features/teacher/dashboard/dashboard_page.dart';
 import '../../features/teacher/classes/classes_page.dart';
-import '../../features/teacher/learningProgres/learning_progres_page.dart';
+import '../../features/teacher/learningProgres/learningprogres_page.dart';
 import '../../features/teacher/schedule/schedule_page.dart';
 import '../../features/student/dashboard/dashboard_page.dart';
 import '../../features/student/classes/classes_page.dart';

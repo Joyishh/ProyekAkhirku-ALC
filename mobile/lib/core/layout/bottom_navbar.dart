@@ -33,7 +33,6 @@ class BottomNavbar extends StatelessWidget {
           _buildNavItem(1, Icons.menu_book_outlined, "Classes", context),
           _buildNavItem(2, Icons.bar_chart_outlined, "Progress", context),
           _buildNavItem(3, Icons.calendar_today_outlined, "Schedule", context),
-          _buildNavItem(4, Icons.person_outline, "Profile", context),
         ],
       ),
     );

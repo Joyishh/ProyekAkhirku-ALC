@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/layout/main_layout.dart';
 // Pastikan import ini mengarah ke file widget yang benar
-import '../../../../core/widgets/class_detail_info_card.dart';
-import '../../../../core/widgets/class_attendance_history.dart'; // Sesuaikan jika nama file beda
-import '../../../../core/widgets/class_student_list.dart'; // Ganti class_student_list.dart jika isinya cuma satu kartu
+import '../../../core/widgets/class_detail_info_card.dart';
+import 'widgets/class_attendance_history.dart'; // Sesuaikan jika nama file beda
+import 'widgets/class_student_list.dart'; // Ganti class_student_list.dart jika isinya cuma satu kartu
 import 'session_detail_page.dart';
 
 class TeacherClassDetailPage extends StatelessWidget {
