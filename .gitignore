@@ -1,0 +1,6 @@
+# Editor Config (Wajib di-ignore)
+.vscode/
+.idea/
+
+# System Files
+.DS_Store

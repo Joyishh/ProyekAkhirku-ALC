@@ -12,6 +12,7 @@ class ClassCard extends StatelessWidget {
   // --- Configuration ---
   final ClassCardType type;
   final VoidCallback? onTap;
+  final bool showProgress; // Control visibility of progress section
 
   // --- Data ---
   final String title;
@@ -32,6 +33,7 @@ class ClassCard extends StatelessWidget {
     super.key,
     required this.type,
     this.onTap,
+    this.showProgress = true,
     required this.title,
     required this.subtitle,
     this.isActive = true,
@@ -98,7 +100,7 @@ class ClassCard extends StatelessWidget {
                 _buildInfoGrid(),
 
                 // 4. FOOTER SECTION (Dinamis based on Enum)
-                if (type != ClassCardType.schedule) 
+                if (showProgress && type != ClassCardType.schedule) 
                    _buildFooter(),
               ],
             ),

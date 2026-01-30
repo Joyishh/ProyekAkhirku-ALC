@@ -25,7 +25,7 @@ class BottomNavbar extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 30),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
