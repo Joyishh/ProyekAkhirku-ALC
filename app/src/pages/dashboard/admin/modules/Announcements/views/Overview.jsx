@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 import { TextField, MenuItem } from '@mui/material';
+import ModuleHeader from '../../../../../../components/ModuleHeader';
 
 const Overview = ({
   // Form State
@@ -21,17 +22,12 @@ const Overview = ({
   return (
     <div className="space-y-6">
       {/* Module Header */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-yellow-100 rounded-lg">
-            <Icon icon="mdi:bullhorn" className="w-6 h-6 text-yellow-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Announcements</h1>
-            <p className="text-gray-600">Create and manage announcements for students and staff</p>
-          </div>
-        </div>
-      </div>
+      <ModuleHeader
+        icon="mdi:bullhorn"
+        iconColor="yellow"
+        title="Announcements Management"
+        description="Create and manage announcements for students and teachers"
+      />
 
       {/* Split View Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

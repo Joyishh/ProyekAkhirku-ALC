@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import ModuleHeader from '../../../../../../../components/ModuleHeader';
 
 /**
  * Menu - Initial menu displaying statistics and navigation buttons
@@ -20,17 +21,12 @@ const Menu = ({
   return (
     <div className="space-y-6">
       {/* Module Header */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Icon icon="mdi:account-plus" className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Student Registration</h1>
-            <p className="text-gray-600">Register new students and manage pending registrations</p>
-          </div>
-        </div>
-      </div>
+      <ModuleHeader
+        title="Student Registration Management"
+        description="Register new students and manage pending registrations"
+        icon="mdi:account-multiple-plus"
+        iconColor="blue"
+      />
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

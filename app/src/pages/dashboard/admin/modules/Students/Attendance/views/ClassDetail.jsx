@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { TablePagination } from '@mui/material';
+import ModuleHeader from '../../../../../../../components/ModuleHeader';
+import DataTable from '../../../../../../../components/DataTable';
 
 const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
   const [page, setPage] = useState(0);
@@ -43,16 +45,12 @@ const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
   return (
     <div className="space-y-6">
       {/* Boxed Header with Back Button */}
-      <div className="bg-white p-6 rounded-xl shadow-sm flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
-            <Icon icon="mdi:school" className="w-7 h-7 text-purple-600" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">{classData.name}</h2>
-            <p className="text-gray-600 mt-1">Teacher: {classData.teacher}</p>
-          </div>
-        </div>
+      <ModuleHeader
+        icon="mdi:school"
+        iconColor="purple"
+        title={classData.name}
+        description={`Teacher: ${classData.teacher}`}
+      >
         <button
           onClick={onBack}
           className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
@@ -60,7 +58,7 @@ const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
           <Icon icon="mdi:arrow-left" className="w-5 h-5 mr-2" />
           Back to Overview
         </button>
-      </div>
+      </ModuleHeader>
 
       {/* Top Row: Class Details & Attendance History */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -183,117 +181,78 @@ const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
       </div>
 
       {/* Bottom: Students List */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-            <Icon icon="mdi:account-group" className="w-5 h-5 mr-2 text-blue-500" />
-            Students in This Class
-          </h2>
-        </div>
-
-        {/* Students Table */}
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Attendance Rate
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Attended
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {students.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center">
-                      <Icon icon="mdi:account-group" className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500">No students in this class</p>
-                    </td>
-                  </tr>
-                ) : (
-                  students
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((student) => (
-                    <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={student.photo}
-                            alt={student.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-600">{student.studentId}</span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="text-sm font-medium text-gray-900">{student.attendanceRate}%</div>
-                          <div className="ml-2 w-16 bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                student.attendanceRate >= 90 ? 'bg-green-500' :
-                                student.attendanceRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                              }`}
-                              style={{ width: `${student.attendanceRate}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {new Date(student.lastAttended).toLocaleDateString('en-US', { 
-                          month: 'short', 
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
-                          {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        {/* Pagination */}
-        {students.length > 0 && (
-          <TablePagination
-            component="div"
-            count={students.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[10, 25, 50]}
-            sx={{
-              borderTop: '1px solid #e5e7eb',
-              '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
-                marginTop: '14px',
-                marginBottom: '14px'
-              }
-            }}
-          />
-        )}
-      </div>
+      <DataTable
+        title="Students in This Class"
+        columns={[
+          {
+            header: "Student",
+            align: "left",
+            render: (student) => (
+              <div className="flex items-center space-x-3">
+                <img
+                  src={student.photo}
+                  alt={student.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div className="text-sm font-medium text-gray-900">{student.name}</div>
+              </div>
+            ),
+          },
+          {
+            header: "Student ID",
+            align: "left",
+            render: (student) => <span className="text-sm text-gray-600">{student.studentId}</span>,
+          },
+          {
+            header: "Attendance Rate",
+            align: "left",
+            render: (student) => (
+              <div className="flex items-center">
+                <div className="text-sm font-medium text-gray-900">{student.attendanceRate}%</div>
+                <div className="ml-2 w-16 bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full ${
+                      student.attendanceRate >= 90 ? 'bg-green-500' :
+                      student.attendanceRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${student.attendanceRate}%` }}
+                  ></div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            header: "Last Attended",
+            align: "left",
+            render: (student) => (
+              <span className="text-sm text-gray-900">
+                {new Date(student.lastAttended).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
+            ),
+          },
+          {
+            header: "Status",
+            align: "left",
+            render: (student) => (
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(student.status)}`}>
+                {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+              </span>
+            ),
+          },
+        ]}
+        data={students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+        pagination={{
+          count: students.length,
+          page: page,
+          rowsPerPage: rowsPerPage,
+          handleChangePage: handleChangePage,
+          handleChangeRowsPerPage: handleChangeRowsPerPage,
+        }}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import KPICard from '../../../../../components/KPICard';
 
 const AdminDashboardModule = () => {
   // KPI Data
@@ -8,32 +9,28 @@ const AdminDashboardModule = () => {
       title: 'Active Students',
       value: '284',
       icon: 'mdi:account-group',
-      bgColor: 'bg-blue-100',
-      iconColor: 'text-blue-600',
+      color: 'blue',
       trend: '+12 this month'
     },
     {
       title: 'Pending Registrations',
       value: '18',
       icon: 'mdi:account-clock',
-      bgColor: 'bg-orange-100',
-      iconColor: 'text-orange-600',
+      color: 'orange',
       trend: 'Needs approval'
     },
     {
       title: 'Overdue Payments',
       value: '7',
       icon: 'mdi:alert-circle',
-      bgColor: 'bg-red-100',
-      iconColor: 'text-red-600',
+      color: 'red',
       trend: 'Requires action!'
     },
     {
       title: 'Monthly Revenue',
       value: 'Rp 62.4M',
       icon: 'mdi:cash-multiple',
-      bgColor: 'bg-emerald-100',
-      iconColor: 'text-emerald-600',
+      color: 'emerald',
       trend: '+8% vs last month'
     }
   ];
@@ -60,7 +57,7 @@ const AdminDashboardModule = () => {
       title: '3 New Registrations',
       description: 'Waiting for approval & class assignment',
       icon: 'mdi:account-plus',
-      iconColor: 'text-blue-600',
+      color: 'blue',
       bgColor: 'bg-blue-50',
       borderColor: 'border-l-4 border-blue-500',
       actionLabel: 'Review',
@@ -73,7 +70,7 @@ const AdminDashboardModule = () => {
       title: '5 Overdue Invoices',
       description: 'Payment overdue > 5 days',
       icon: 'mdi:receipt-text-clock',
-      iconColor: 'text-red-600',
+      color: 'red',
       bgColor: 'bg-red-50',
       borderColor: 'border-l-4 border-red-500',
       actionLabel: 'Send Reminder',
@@ -86,7 +83,7 @@ const AdminDashboardModule = () => {
       title: '3 Students at Risk',
       description: 'Missed 3+ consecutive classes',
       icon: 'mdi:account-alert',
-      iconColor: 'text-amber-600',
+      color: 'amber',
       bgColor: 'bg-amber-50',
       borderColor: 'border-l-4 border-amber-500',
       actionLabel: 'Contact Parent',
@@ -134,16 +131,14 @@ const AdminDashboardModule = () => {
       {/* Baris 1: Key Performance Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiData.map((kpi, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-lg ${kpi.bgColor}`}>
-                <Icon icon={kpi.icon} className={`w-7 h-7 ${kpi.iconColor}`} />
-              </div>
-            </div>
-            <h3 className="text-sm font-medium text-gray-600 mb-1">{kpi.title}</h3>
-            <p className="text-3xl font-bold text-gray-900 mb-2">{kpi.value}</p>
-            <p className="text-xs text-gray-500">{kpi.trend}</p>
-          </div>
+          <KPICard 
+            key={index}
+            title={kpi.title}
+            value={kpi.value}
+            icon={kpi.icon}
+            color={kpi.color}
+            trend={kpi.trend}
+          />
         ))}
       </div>
 
@@ -225,22 +220,32 @@ const AdminDashboardModule = () => {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Needs Attention</h2>
           
           <div className="space-y-4">
-            {actionItems.map((item) => (
-              <div
-                key={item.id}
-                className={`${item.bgColor} ${item.borderColor} rounded-lg p-4 shadow-sm`}
-              >
-                <div className="flex items-start space-x-3 mb-3">
-                  <div className="mt-0.5">
-                    <Icon icon={item.icon} className={`w-5 h-5 ${item.iconColor}`} />
+            {actionItems.map((item) => {
+              // Map color to icon text color
+              const iconColorClass = {
+                blue: 'text-blue-600',
+                red: 'text-red-600',
+                amber: 'text-amber-600',
+                green: 'text-green-600',
+                orange: 'text-orange-600'
+              }[item.color] || 'text-gray-600';
+
+              return (
+                <div
+                  key={item.id}
+                  className={`${item.bgColor} ${item.borderColor} rounded-lg p-4 shadow-sm`}
+                >
+                  <div className="flex items-start space-x-3 mb-3">
+                    <div className="mt-0.5">
+                      <Icon icon={item.icon} className={`w-5 h-5 ${iconColorClass}`} />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-800 text-sm mb-0.5">
+                        {item.title}
+                      </h3>
+                      <p className="text-xs text-gray-600">{item.description}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 text-sm mb-0.5">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs text-gray-600">{item.description}</p>
-                  </div>
-                </div>
                 <button
                   onClick={() => handleAction(item.id)}
                   className={`w-full ${item.actionColor} text-white text-sm font-medium py-2 rounded-lg transition-colors cursor-pointer`}
@@ -248,7 +253,8 @@ const AdminDashboardModule = () => {
                   {item.actionLabel}
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import ModuleHeader from '../../../../../../../components/ModuleHeader';
 
 const Overview = ({
   days,
@@ -15,35 +16,29 @@ const Overview = ({
   return (
     <div className="space-y-6">
       {/* Module Header */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Icon icon="mdi:calendar-clock" className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Schedule Management</h1>
-              <p className="text-gray-600">Manage class schedules and assign students</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => setShowRoomModal(true)}
-              className="flex items-center space-x-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors cursor-pointer"
-            >
-              <Icon icon="mdi:office-building" className="w-5 h-5" />
-              <span className="font-medium">Manage Rooms</span>
-            </button>
-            <button
-              onClick={handleAddSchedule}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors cursor-pointer"
-            >
-              <Icon icon="mdi:plus-circle" className="w-5 h-5" />
-              <span className="font-medium">Add Schedule</span>
-            </button>
-          </div>
+      <ModuleHeader
+        icon="mdi:calendar-clock"
+        iconColor="blue"
+        title="Schedule Management"
+        description="Manage class schedules and assign students"
+      >
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowRoomModal(true)}
+            className="flex items-center space-x-2 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg transition-colors cursor-pointer"
+          >
+            <Icon icon="mdi:office-building" className="w-5 h-5" />
+            <span className="font-medium">Manage Rooms</span>
+          </button>
+          <button
+            onClick={handleAddSchedule}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors cursor-pointer"
+          >
+            <Icon icon="mdi:plus-circle" className="w-5 h-5" />
+            <span className="font-medium">Add Schedule</span>
+          </button>
         </div>
-      </div>
+      </ModuleHeader>
 
       {/* Weekly Calendar Grid */}
       <div className="bg-white rounded-xl p-6 shadow-sm overflow-x-auto">
