@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
+import KPICard from '../../../../../components/KPICard';
 
 const TeacherDashboardModule = ({ onNavigate }) => {
   // Sample data untuk teacher dashboard
@@ -146,36 +147,14 @@ const TeacherDashboardModule = ({ onNavigate }) => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className={`p-2 rounded-lg ${stat.color === 'blue' ? 'bg-blue-100' :
-                    stat.color === 'green' ? 'bg-green-100' :
-                      stat.color === 'emerald' ? 'bg-emerald-100' :
-                        stat.color === 'orange' ? 'bg-orange-100' : 'bg-gray-100'
-                  }`}>
-                  <Icon
-                    icon={stat.icon}
-                    className={`w-6 h-6 ${stat.color === 'blue' ? 'text-blue-600' :
-                        stat.color === 'green' ? 'text-green-600' :
-                          stat.color === 'emerald' ? 'text-emerald-600' :
-                            stat.color === 'orange' ? 'text-orange-600' : 'text-gray-600'
-                      }`}
-                  />
-                </div>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-            <p className="text-2xl font-bold text-gray-800 mb-2">{stat.value}</p>
-            <p className={`text-sm ${stat.changeType === 'positive' ? 'text-emerald-600' :
-                stat.changeType === 'warning' ? 'text-orange-500' :
-                  'text-gray-500'
-              }`}>
-              {stat.changeType === 'positive' && '↑ '}
-              {stat.changeType === 'warning' && '⚠ '}
-              {stat.change}
-            </p>
-          </div>
+          <KPICard
+            key={index}
+            title={stat.title}
+            value={stat.value}
+            icon={stat.icon}
+            trend={stat.change}
+            color={stat.color}
+          />
         ))}
       </div>
 

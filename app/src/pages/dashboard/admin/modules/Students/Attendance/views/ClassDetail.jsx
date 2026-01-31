@@ -3,6 +3,8 @@ import { Icon } from '@iconify/react';
 import { TablePagination } from '@mui/material';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import DataTable from '../../../../../../../components/DataTable';
+import ClassDetailsCard from '../../../../../../../components/ClassDetailsCard';
+import AttendanceHistoryCard from '../../../../../../../components/AttendanceHistoryCard';
 
 const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
   const [page, setPage] = useState(0);
@@ -63,121 +65,21 @@ const ClassDetail = ({ classData, onBack, onAttendanceHistoryClick }) => {
       {/* Top Row: Class Details & Attendance History */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Class Details (Top Left) */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <Icon icon="mdi:information-outline" className="w-5 h-5 mr-2 text-purple-500" />
-            Class Details
-          </h2>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <Icon icon="mdi:calendar" className="w-5 h-5 text-purple-500" />
-              <div>
-                <p className="text-sm text-gray-600">Schedule</p>
-                <p className="font-medium text-gray-800">{classData.schedule}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <Icon icon="mdi:clock-outline" className="w-5 h-5 text-orange-500" />
-              <div>
-                <p className="text-sm text-gray-600">Time</p>
-                <p className="font-medium text-gray-800">{classData.time}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Icon icon="mdi:map-marker" className="w-5 h-5 text-red-500" />
-              <div>
-                <p className="text-sm text-gray-600">Room</p>
-                <p className="font-medium text-gray-800">{classData.room}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Icon icon="mdi:account-group" className="w-5 h-5 text-blue-500" />
-              <div>
-                <p className="text-sm text-gray-600">Total Students</p>
-                <p className="font-medium text-gray-800">{classData.totalStudents} students</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <Icon icon="mdi:chart-line" className="w-5 h-5 text-green-500" />
-              <div>
-                <p className="text-sm text-gray-600">Average Attendance Rate</p>
-                <p className={`font-bold ${
-                  classData.attendanceRate >= 90 ? 'text-green-600' :
-                  classData.attendanceRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {classData.attendanceRate}%
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ClassDetailsCard 
+          classData={{
+            schedule: classData.schedule,
+            time: classData.time,
+            room: classData.room,
+            totalStudents: `${classData.totalStudents} students`,
+            attendanceRate: classData.attendanceRate
+          }}
+        />
 
         {/* Attendance History (Top Right) */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <Icon icon="mdi:clipboard-text-clock" className="w-5 h-5 mr-2 text-green-500" />
-            Attendance History
-            <span className="text-xs text-gray-500 ml-2 font-normal">(Click to view details)</span>
-          </h2>
-          
-          <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
-            {attendanceHistory.length === 0 ? (
-              <div className="text-center py-8">
-                <Icon icon="mdi:calendar-blank" className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">No attendance history</p>
-              </div>
-            ) : (
-              attendanceHistory.map((record, index) => (
-                <div 
-                  key={index} 
-                  onClick={() => onAttendanceHistoryClick(record)}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                >
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {new Date(record.date).toLocaleDateString('en-US', { 
-                        weekday: 'short', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </p>
-                    <p className="text-sm text-gray-600">{record.total} students</p>
-                  </div>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <span className="flex items-center text-green-600">
-                      <Icon icon="mdi:check-circle" className="w-4 h-4 mr-1" />
-                      {record.present}
-                    </span>
-                    {record.late > 0 && (
-                      <span className="flex items-center text-yellow-600">
-                        <Icon icon="mdi:clock-alert" className="w-4 h-4 mr-1" />
-                        {record.late}
-                      </span>
-                    )}
-                    {record.absent > 0 && (
-                      <span className="flex items-center text-red-600">
-                        <Icon icon="mdi:close-circle" className="w-4 h-4 mr-1" />
-                        {record.absent}
-                      </span>
-                    )}
-                    {record.excused > 0 && (
-                      <span className="flex items-center text-blue-600">
-                        <Icon icon="mdi:hospital-box" className="w-4 h-4 mr-1" />
-                        {record.excused}
-                      </span>
-                    )}
-                    <Icon icon="mdi:chevron-right" className="w-4 h-4 text-gray-400 ml-2" />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <AttendanceHistoryCard 
+          attendanceHistory={attendanceHistory}
+          onAttendanceHistoryClick={onAttendanceHistoryClick}
+        />
       </div>
 
       {/* Bottom: Students List */}

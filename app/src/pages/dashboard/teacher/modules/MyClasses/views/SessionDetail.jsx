@@ -3,10 +3,12 @@ import { Icon } from "@iconify/react";
 import { TextField, MenuItem, TablePagination } from "@mui/material";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
+import ModuleHeader from "../../../../../../components/ModuleHeader";
+import DataTable from "../../../../../../components/DataTable";
 
 const AttendanceDetailView = ({ attendanceData, onBack }) => {
   const [students, setStudents] = useState(
-    attendanceData?.studentsDetail || []
+    attendanceData?.studentsDetail || [],
   );
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -41,8 +43,9 @@ const AttendanceDetailView = ({ attendanceData, onBack }) => {
 
     if (student.status === newStatus) {
       toast.info(
-        `Student is already marked as ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)
-        }`
+        `Student is already marked as ${
+          newStatus.charAt(0).toUpperCase() + newStatus.slice(1)
+        }`,
       );
       return;
     }
@@ -56,8 +59,9 @@ const AttendanceDetailView = ({ attendanceData, onBack }) => {
 
     const result = await Swal.fire({
       title: "Update Attendance?",
-      text: `Change status for ${student.name} to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)
-        }?`,
+      text: `Change status for ${student.name} to ${
+        newStatus.charAt(0).toUpperCase() + newStatus.slice(1)
+      }?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Yes, Update",
@@ -70,8 +74,8 @@ const AttendanceDetailView = ({ attendanceData, onBack }) => {
     if (result.isConfirmed) {
       setStudents((prevStudents) =>
         prevStudents.map((s) =>
-          s.id === studentId ? { ...s, status: newStatus } : s
-        )
+          s.id === studentId ? { ...s, status: newStatus } : s,
+        ),
       );
 
       toast.success("Attendance updated successfully!");
@@ -96,49 +100,38 @@ const AttendanceDetailView = ({ attendanceData, onBack }) => {
   }
 
   return (
-    <div>
-      {/* Attendance Details Header with Back Button */}
-      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm mb-6 border border-gray-100">
-        <div className="flex flex-row items-center gap-3 md:justify-between">
-
-          <div className="flex items-center gap-3 md:gap-4 order-2 md:order-1 flex-1 min-w-0">
-            <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
-              <Icon icon="mdi:calendar-check" className="w-6 h-6 md:w-8 md:h-8 text-white" />
+    <div className="space-y-6">
+      {/* Module Header */}
+      <ModuleHeader
+        icon="mdi:calendar-check"
+        iconColor="blue"
+        title="Session Attendance Details"
+        description={
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mt-1">
+            <div className="flex items-center space-x-1">
+              <Icon icon="mdi:calendar" className="w-4 h-4" />
+              <span>
+                {new Date(attendanceData.date).toLocaleDateString("en-US", {
+                  weekday: "short",
+                  day: "numeric",
+                })}
+              </span>
             </div>
-
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg md:text-2xl font-bold text-gray-800 mb-0.5 md:mb-1 leading-tight truncate">
-                Session Attendance Details
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs md:text-sm text-gray-600">
-                <div className="flex items-center space-x-1">
-                  <Icon icon="mdi:calendar" className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span className="truncate">
-                    {new Date(attendanceData.date).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Icon icon="mdi:account-group" className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                  <span>{students.length} Students</span>
-                </div>
-              </div>
+            <div className="flex items-center space-x-1">
+              <Icon icon="mdi:account-group" className="w-4 h-4" />
+              <span>{students.length} Students</span>
             </div>
           </div>
-
-          <button
-            onClick={onBack}
-            className="order-1 md:order-2 flex items-center justify-center p-2 md:px-4 md:py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all cursor-pointer shrink-0"
-          >
-            <Icon icon="mdi:arrow-left" className="w-6 h-6 md:w-5 md:h-5 md:mr-2" />
-            <span className="hidden md:inline font-normal">Back to Class Detail</span>
-          </button>
-
-        </div>
-      </div>
+        }
+      >
+        <button
+          onClick={onBack}
+          className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all cursor-pointer"
+        >
+          <Icon icon="mdi:arrow-left" className="w-5 h-5 mr-2" />
+          Back to Classes
+        </button>
+      </ModuleHeader>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
@@ -223,221 +216,156 @@ const AttendanceDetailView = ({ attendanceData, onBack }) => {
       </div>
 
       {/* Students Table */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Student Attendance List
-          </h2>
-          <p className="text-sm text-gray-600">
-            You can edit status for each student
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-gray-200">
-          <div className="overflow-x-auto flex-1 w-full" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <table className="w-full" style={{ minWidth: '700px' }}>
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time Recorded
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {students
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((student) => (
-                    <tr
-                      key={student.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={student.photo}
-                            alt={student.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              {student.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              ID: {student.id.toString().padStart(3, "0")}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-sm text-gray-900">
-                          <Icon icon="mdi:clock-outline" className="w-4 h-4 mr-2 text-gray-400" />
-                          {student.time || <span className="text-gray-400 italic">Not recorded</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <TextField
-                          select
-                          value={student.status}
-                          onChange={(e) =>
-                            handleStatusUpdate(student.id, e.target.value)
-                          }
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            minWidth: "140px",
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "20px",
-                              fontSize: "0.875rem",
-                              fontWeight: 500,
-                              backgroundColor:
-                                student.status === "present"
-                                  ? "#dcfce7"
-                                  : student.status === "late"
-                                    ? "#fef3c7"
-                                    : student.status === "absent"
-                                      ? "#fee2e2"
-                                      : "#f3f4f6",
-                              "& fieldset": {
-                                borderColor:
-                                  student.status === "present"
-                                    ? "#10b981"
-                                    : student.status === "late"
-                                      ? "#f59e0b"
-                                      : student.status === "absent"
-                                        ? "#ef4444"
-                                        : "#d1d5db",
-                              },
-                              "&:hover fieldset": {
-                                borderColor:
-                                  student.status === "present"
-                                    ? "#059669"
-                                    : student.status === "late"
-                                      ? "#d97706"
-                                      : student.status === "absent"
-                                        ? "#dc2626"
-                                        : "#9ca3af",
-                              },
-                              "&.Mui-focused fieldset": {
-                                borderColor:
-                                  student.status === "present"
-                                    ? "#059669"
-                                    : student.status === "late"
-                                      ? "#d97706"
-                                      : student.status === "absent"
-                                        ? "#dc2626"
-                                        : "#6b7280",
-                                borderWidth: "2px",
-                              },
-                            },
-                            "& .MuiSelect-select": {
-                              color:
-                                student.status === "present"
-                                  ? "#166534"
-                                  : student.status === "late"
-                                    ? "#92400e"
-                                    : student.status === "absent"
-                                      ? "#991b1b"
-                                      : "#374151",
-                              paddingY: "6px",
-                            },
-                          }}
-                        >
-                          <MenuItem
-                            value="present"
-                            sx={{ color: "#16a34a", fontWeight: 500 }}
-                          >
-                            <Icon
-                              icon="mdi:check-circle"
-                              className="w-4 h-4 mr-2 inline"
-                            />
-                            Present
-                          </MenuItem>
-                          <MenuItem
-                            value="late"
-                            sx={{ color: "#f59e0b", fontWeight: 500 }}
-                          >
-                            <Icon
-                              icon="mdi:clock-alert"
-                              className="w-4 h-4 mr-2 inline"
-                            />
-                            Late
-                          </MenuItem>
-                          <MenuItem
-                            value="absent"
-                            sx={{ color: "#ef4444", fontWeight: 500 }}
-                          >
-                            <Icon
-                              icon="mdi:close-circle"
-                              className="w-4 h-4 mr-2 inline"
-                            />
-                            Absent
-                          </MenuItem>
-                        </TextField>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination outside scroll view */}
-          {students.length > 0 && (
-            <div className="border-t border-gray-200 bg-white relative z-10">
-              <TablePagination
-                component="div"
-                count={students.length}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[10, 25, 50]}
-                labelRowsPerPage={<span>Rows per page:</span>}
+      <DataTable
+        title="Student Attendance List"
+        columns={[
+          {
+            header: "Student",
+            render: (student) => (
+              <div className="flex items-center space-x-3">
+                <img
+                  src={student.photo}
+                  alt={student.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {student.name}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    ID: {student.id.toString().padStart(3, "0")}
+                  </div>
+                </div>
+              </div>
+            ),
+          },
+          {
+            header: "Time Recorded",
+            render: (student) => (
+              <div className="flex items-center text-sm text-gray-900">
+                <Icon
+                  icon="mdi:clock-outline"
+                  className="w-4 h-4 mr-2 text-gray-400"
+                />
+                {student.time || (
+                  <span className="text-gray-400 italic">Not recorded</span>
+                )}
+              </div>
+            ),
+          },
+          {
+            header: "Status",
+            render: (student) => (
+              <TextField
+                select
+                value={student.status}
+                onChange={(e) =>
+                  handleStatusUpdate(student.id, e.target.value)
+                }
+                size="small"
+                variant="outlined"
                 sx={{
-                  ".MuiTablePagination-toolbar": {
-                    paddingLeft: 2,
-                    paddingRight: 2,
-                    minHeight: "52px",
-                    "@media (max-width: 640px)": {
-                      paddingLeft: 1,
-                      paddingRight: 1,
-                      flexWrap: "wrap",
-                      justifyContent: "center",
-                    }
-                  },
-                  ".MuiTablePagination-spacer": {
-                    "@media (max-width: 640px)": {
-                      display: "none",
-                    }
-                  },
-                  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+                  minWidth: "140px",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "20px",
                     fontSize: "0.875rem",
-                    "@media (max-width: 640px)": {
-                      marginTop: 1,
-                      marginBottom: 1
-                    }
+                    fontWeight: 500,
+                    backgroundColor:
+                      student.status === "present"
+                        ? "#dcfce7"
+                        : student.status === "late"
+                          ? "#fef3c7"
+                          : student.status === "absent"
+                            ? "#fee2e2"
+                            : "#f3f4f6",
+                    "& fieldset": {
+                      borderColor:
+                        student.status === "present"
+                          ? "#10b981"
+                          : student.status === "late"
+                            ? "#f59e0b"
+                            : student.status === "absent"
+                              ? "#ef4444"
+                              : "#d1d5db",
+                    },
+                    "&:hover fieldset": {
+                      borderColor:
+                        student.status === "present"
+                          ? "#059669"
+                          : student.status === "late"
+                            ? "#d97706"
+                            : student.status === "absent"
+                              ? "#dc2626"
+                              : "#9ca3af",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor:
+                        student.status === "present"
+                          ? "#059669"
+                          : student.status === "late"
+                            ? "#d97706"
+                            : student.status === "absent"
+                              ? "#dc2626"
+                              : "#6b7280",
+                      borderWidth: "2px",
+                    },
                   },
-                  ".MuiInputBase-root": {
-                    marginRight: 2,
-                    marginLeft: 1
+                  "& .MuiSelect-select": {
+                    color:
+                      student.status === "present"
+                        ? "#166534"
+                        : student.status === "late"
+                          ? "#92400e"
+                          : student.status === "absent"
+                            ? "#991b1b"
+                            : "#374151",
+                    paddingY: "6px",
                   },
-                  ".MuiTablePagination-actions": {
-                    marginLeft: 0,
-                    "@media (max-width: 640px)": {
-                      marginTop: 1
-                    }
-                  }
                 }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+              >
+                <MenuItem
+                  value="present"
+                  sx={{ color: "#16a34a", fontWeight: 500 }}
+                >
+                  <Icon
+                    icon="mdi:check-circle"
+                    className="w-4 h-4 mr-2 inline"
+                  />
+                  Present
+                </MenuItem>
+                <MenuItem
+                  value="late"
+                  sx={{ color: "#f59e0b", fontWeight: 500 }}
+                >
+                  <Icon
+                    icon="mdi:clock-alert"
+                    className="w-4 h-4 mr-2 inline"
+                  />
+                  Late
+                </MenuItem>
+                <MenuItem
+                  value="absent"
+                  sx={{ color: "#ef4444", fontWeight: 500 }}
+                >
+                  <Icon
+                    icon="mdi:close-circle"
+                    className="w-4 h-4 mr-2 inline"
+                  />
+                  Absent
+                </MenuItem>
+              </TextField>
+            ),
+          },
+        ]}
+        data={students.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)}
+        pagination={{
+          count: students.length,
+          page: page,
+          rowsPerPage: rowsPerPage,
+          handleChangePage: handleChangePage,
+          handleChangeRowsPerPage: handleChangeRowsPerPage,
+        }}
+      />
 
       {/* Empty State */}
       {students.length === 0 && (

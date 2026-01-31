@@ -10,6 +10,7 @@ const DataTable = ({
   onSearchChange,
   filterComponents, // Ini untuk menampung Dropdown filter yang unik tiap halaman
   actionComponent, // Ini opsional, misal tombol "Export Data"
+  headerActionComponent, // Action di sebelah kanan title/subtitle
   columns, // Konfigurasi Kolom
   data,
   pagination, // Object { page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, count }
@@ -18,8 +19,13 @@ const DataTable = ({
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* --- HEADER SECTION --- */}
       <div className="p-6 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-600 mb-4">{subtitle}</p>}
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+            {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+          </div>
+          {headerActionComponent && <div>{headerActionComponent}</div>}
+        </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Search Bar - Only show if searchQuery and onSearchChange are provided */}
