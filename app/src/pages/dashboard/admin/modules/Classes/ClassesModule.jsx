@@ -1,19 +1,10 @@
 import React from 'react';
-import ScheduleModule from './Schedule/ScheduleModule.jsx';
+import { Outlet } from 'react-router-dom';
 
-const ClassesModule = ({ activeSubModule }) => {
-  const renderSubModule = () => {
-    switch(activeSubModule) {
-      case 'schedule':
-        return <ScheduleModule />;
-      default:
-        return <ScheduleModule />; // Default to schedule
-    }
-  };
-
+const ClassesModule = () => {
   return (
     <div className="classes-module">
-      {renderSubModule()}
+      <Outlet />
     </div>
   );
 };

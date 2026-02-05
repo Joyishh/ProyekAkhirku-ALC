@@ -4,12 +4,12 @@ import { Avatar, IconButton, Tooltip } from '@mui/material';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import authService from '../../../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const SidebarAdmin = ({ onMenuChange }) => {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+const SidebarAdmin = () => {
   const [expandedGroups, setExpandedGroups] = useState({});
   const navigate = useNavigate();
+  const location = useLocation();
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   
   const user = {
@@ -23,18 +23,20 @@ const SidebarAdmin = ({ onMenuChange }) => {
       id: 'dashboard',
       label: 'Dashboard',
       icon: 'material-symbols:dashboard-2-outline-rounded',
-      type: 'single'
+      type: 'single',
+      path: '/dashboard/admin'
     },
     {
       id: 'students',
       label: 'Students',
       icon: 'mdi:account-group',
       type: 'dropdown',
+      path: '/dashboard/admin/students',
       children: [
-        { id: 'student-registration', label: 'Registration', icon: 'mdi:account-plus' },
-        { id: 'student-data', label: 'Students Data', icon: 'mdi:database-edit' },
-        { id: 'attendance', label: 'Attendance', icon: 'mdi:clipboard-check' },
-        { id: 'learning-progress', label: 'Learning Progress', icon: 'mdi:chart-line' }
+        { id: 'registration', label: 'Registration', icon: 'mdi:account-plus', path: '/dashboard/admin/students/registration' },
+        { id: 'data', label: 'Students Data', icon: 'mdi:database-edit', path: '/dashboard/admin/students/data' },
+        { id: 'attendance', label: 'Attendance', icon: 'mdi:clipboard-check', path: '/dashboard/admin/students/attendance' },
+        { id: 'learning-progress', label: 'Learning Progress', icon: 'mdi:chart-line', path: '/dashboard/admin/students/learning-progress' }
       ]
     },
     {
@@ -42,30 +44,36 @@ const SidebarAdmin = ({ onMenuChange }) => {
       label: 'Classes',
       icon: 'mdi:school',
       type: 'dropdown',
+      path: '/dashboard/admin/classes',
       children: [
-        { id: 'schedule', label: 'Schedule', icon: 'mdi:calendar-clock' }
+        { id: 'schedule', label: 'Schedule', icon: 'mdi:calendar-clock', path: '/dashboard/admin/classes/schedule' }
       ]
     },
     {
       id: 'finance',
       label: 'Finance',
       icon: 'mdi:currency-usd',
-      type: 'single'
+      type: 'single',
+      path: '/dashboard/admin/finance'
     },
     {
       id: 'announcements',
       label: 'Announcements',
       icon: 'mdi:bullhorn',
-      type: 'single'
+      type: 'single',
+      path: '/dashboard/admin/announcements'
     }
   ];
 
-  const handleMenuClick = (menuId) => {
-    setActiveMenu(menuId);
-    // Notify parent component about menu change
-    if (onMenuChange) {
-      onMenuChange(menuId);
+  const isActive = (path) => {
+    if (path === '/dashboard/admin') {
+      return location.pathname === '/dashboard/admin' || location.pathname === '/dashboard/admin/';
     }
+    return location.pathname.startsWith(path);
+  };
+
+  const handleMenuClick = (path) => {
+    navigate(path);
   };
 
   const toggleGroup = (groupId) => {
@@ -107,7 +115,7 @@ const SidebarAdmin = ({ onMenuChange }) => {
     }
   };
 
-return (
+  return (
     <aside className="h-screen w-64 bg-[#162B3A] flex flex-col shadow-lg">
       {/* Logo di bagian atas dengan background terang dan padding */}
       <div className="w-full flex justify-center items-center py-6 px-4">
@@ -126,9 +134,9 @@ return (
             <li key={item.id}>
               {item.type === 'single' ? (
                 <button
-                  onClick={() => handleMenuClick(item.id)}
+                  onClick={() => handleMenuClick(item.path)}
                   className={`w-full flex items-center py-3 px-4 rounded-lg text-left transition-all duration-200 group ${
-                    activeMenu === item.id
+                    isActive(item.path)
                       ? 'bg-[#2196F3] text-white font-semibold shadow-sm'
                       : 'text-gray-300 hover:bg-[#1B98E0] hover:text-white'
                   }`}
@@ -136,7 +144,7 @@ return (
                   <span className="flex items-center justify-center w-6 h-6 mr-3">
                     <Icon 
                       icon={item.icon} 
-                      className={`text-xl ${activeMenu === item.id ? 'text-white' : 'text-gray-300 group-hover:text-white'}`} 
+                      className={`text-xl ${isActive(item.path) ? 'text-white' : 'text-gray-300 group-hover:text-white'}`} 
                     />
                   </span>
                   <span className="text-sm font-medium truncate">{item.label}</span>
@@ -165,9 +173,9 @@ return (
                       {item.children.map((child) => (
                         <li key={child.id}>
                           <button
-                            onClick={() => handleMenuClick(child.id)}
+                            onClick={() => handleMenuClick(child.path)}
                             className={`w-full flex items-center py-2 px-3 rounded-md text-left transition-all duration-200 group ${
-                              activeMenu === child.id
+                              location.pathname === child.path
                                 ? 'bg-[#2196F3] text-white font-semibold shadow-sm'
                                 : 'text-gray-400 hover:bg-[#1B98E0] hover:text-white'
                             }`}
@@ -175,7 +183,7 @@ return (
                             <span className="flex items-center justify-center w-5 h-5 mr-3">
                               <Icon 
                                 icon={child.icon} 
-                                className={`text-lg ${activeMenu === child.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} 
+                                className={`text-lg ${location.pathname === child.path ? 'text-white' : 'text-gray-400 group-hover:text-white'}`} 
                               />
                             </span>
                             <span className="text-sm font-medium truncate">{child.label}</span>

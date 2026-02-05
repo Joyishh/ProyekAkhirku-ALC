@@ -3,21 +3,12 @@
   import { Avatar, IconButton, Badge, Tooltip } from '@mui/material';
   import Swal from 'sweetalert2';
   import { toast } from 'react-toastify';
-  import authService from '../../../../services/authService';
-  import { useNavigate } from 'react-router-dom';
 
-  const HeaderStudent = ({ studentData, currentModule, onMenuChange}) => {
+  const HeaderStudent = ({ studentData, currentModule, onMenuChange, onLogout }) => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const notificationRef = useRef(null);
-    const navigate = useNavigate();
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
-    const user = {
-      name: userData.username || userData.email || 'Student',
-      role: 'Student',
-      avatar: null
-    };
     // Mock notifications data for Student
     const notifications = [
       {
@@ -103,37 +94,40 @@
       }
     };
 
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: 'Konfirmasi Logout',
-      text: 'Apakah Anda yakin ingin keluar?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#135bec',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Ya, Keluar',
-      cancelButtonText: 'Batal',
-      reverseButtons: true
-    });
+    const handleLogout = async () => {
+      const result = await Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: 'Apakah Anda yakin ingin keluar?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#135bec',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Keluar',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+      });
 
-    if (result.isConfirmed) {
-      try {
-        await authService.logout();
+      if (result.isConfirmed) {
+        if (onLogout) {
+          onLogout();
+        }
         
-        toast.success('Logout berhasil', {
+        // Show success toast
+        toast.success('Anda telah berhasil logout', {
           position: 'top-right',
-          autoClose: 2000,
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true
         });
-      
-        navigate('/', { replace: true });
         
-      } catch (error) {
-        console.error("Logout error:", error);
-        localStorage.clear();
-        navigate('/', { replace: true });
+        // Redirect to login or home page after a short delay
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1000);
       }
-    }
-  };
+    };
 
     const userName = studentData?.name || 'Student';
     const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -368,7 +362,7 @@
           <div className="hidden md:flex items-center gap-2 md:gap-3">
             <div className="hidden lg:flex flex-col items-end">
               <span className="text-xs text-gray-500">Masuk sebagai</span>
-              <span className="text-sm font-semibold text-[#111318]">{user.name}</span>
+              <span className="text-sm font-semibold text-[#111318]">{userName}</span>
             </div>
             
             <Avatar

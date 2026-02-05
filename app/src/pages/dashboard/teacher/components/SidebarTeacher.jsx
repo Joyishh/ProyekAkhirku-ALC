@@ -1,32 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Icon } from '@iconify/react';
 import { Avatar, IconButton, Tooltip } from '@mui/material';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import authService from '../../../../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-const SidebarTeacher = ({ onMenuChange, currentModule, isMobileSidebarOpen, toggleMobileSidebar }) => {
-  // Convert currentModule back to menuId
-  const getMenuIdFromModule = (module) => {
-    const moduleToId = {
-      'Dashboard': 'dashboard',
-      'My Classes': 'my-classes', 
-      'Learning Progress': 'learning-progress',
-      'Schedule': 'schedule'
-    };
-    return moduleToId[module] || 'dashboard';
-  };
-
+const SidebarTeacher = ({ isMobileSidebarOpen, toggleMobileSidebar }) => {
   const navigate = useNavigate();
-  const [activeMenu, setActiveMenu] = useState(() => getMenuIdFromModule(currentModule));
+  const location = useLocation();
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   
-  React.useEffect(() => {
-    const menuId = getMenuIdFromModule(currentModule);
-    setActiveMenu(menuId);
-  }, [currentModule]);
-
   const user = {
     name: userData.username || userData.email || 'Teacher',
     role: 'Teacher',
@@ -38,35 +22,37 @@ const SidebarTeacher = ({ onMenuChange, currentModule, isMobileSidebarOpen, togg
       id: 'dashboard',
       label: 'Dashboard',
       icon: 'material-symbols:dashboard-2-outline-rounded',
-      onClick: () => console.log('Navigate to Dashboard')
+      path: '/dashboard/teacher'
     },
     {
-      id: 'my-classes',
+      id: 'classes',
       label: 'My Classes',
       icon: 'mdi:book-open-page-variant',
-      onClick: () => console.log('Navigate to My Classes')
+      path: '/dashboard/teacher/classes'
     },
     {
       id: 'learning-progress',
       label: 'Learning Progress',
       icon: 'mdi:clipboard-check-outline',
-      onClick: () => console.log('Navigate to Learning Progress')
+      path: '/dashboard/teacher/learning-progress'
     },
     {
       id: 'schedule',
       label: 'Schedule',
       icon: 'akar-icons:schedule',
-      onClick: () => console.log('Navigate to Schedule')
+      path: '/dashboard/teacher/schedule'
     },
   ];
 
-  const handleMenuClick = (menuId, onClick) => {
-    setActiveMenu(menuId);
-    onClick();
-    // Notify parent component about menu change
-    if (onMenuChange) {
-      onMenuChange(menuId);
+  const isActive = (path) => {
+    if (path === '/dashboard/teacher') {
+      return location.pathname === '/dashboard/teacher' || location.pathname === '/dashboard/teacher/';
     }
+    return location.pathname.startsWith(path);
+  };
+
+  const handleMenuClick = (path) => {
+    navigate(path);
     // Close mobile sidebar after menu click
     if (isMobileSidebarOpen && toggleMobileSidebar) {
       toggleMobileSidebar();
@@ -145,9 +131,9 @@ const SidebarTeacher = ({ onMenuChange, currentModule, isMobileSidebarOpen, togg
           {menuItems.map((item) => (
             <li key={item.id}>
               <button
-                onClick={() => handleMenuClick(item.id, item.onClick)}
+                onClick={() => handleMenuClick(item.path)}
                 className={`w-full flex items-center py-3 px-4 rounded-lg text-left transition-all duration-200 group ${
-                  activeMenu === item.id
+                  isActive(item.path)
                     ? 'bg-[#2196F3] text-white font-semibold shadow-sm'
                     : 'text-gray-300 hover:bg-[#1B98E0] hover:text-white'
                 }`}
@@ -155,7 +141,7 @@ const SidebarTeacher = ({ onMenuChange, currentModule, isMobileSidebarOpen, togg
                 <span className="flex items-center justify-center w-6 h-6 mr-3">
                   <Icon 
                     icon={item.icon} 
-                    className={`text-xl ${activeMenu === item.id ? 'text-white' : 'text-gray-300 group-hover:text-white'}`} 
+                    className={`text-xl ${isActive(item.path) ? 'text-white' : 'text-gray-300 group-hover:text-white'}`} 
                   />
                 </span>
                 <span className="text-sm font-medium truncate">{item.label}</span>

@@ -1,73 +1,30 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Layout from './components/Layout.jsx';
-import AdminDashboardModule from './modules/Dashboard/AdminDashboardModule.jsx';
-import StudentsModule from './modules/Students/StudentsModule.jsx';
-import ClassesModule from './modules/Classes/ClassesModule.jsx';
-import FinanceModule from './modules/Finance/FinanceModule.jsx';
-import AnnouncementsModule from './modules/Announcements/AnnouncementsModule.jsx';
 
 const AdminDashboard = () => {
-  const [currentModule, setCurrentModule] = useState('Dashboard');
+  const location = useLocation();
 
-  const getModuleName = (menuId) => {
-    const moduleNames = {
-      'dashboard': 'Dashboard',
-      'student-registration': 'Student Registration',
-      'student-data': 'Students Data Management',
-      'attendance': 'Attendance Management',
-      'learning-progress': 'Learning Progress',
-      'schedule': 'Schedule Management',
-      'finance': 'Finance Management',
-      'announcements': 'Announcements'
-    };
-    return moduleNames[menuId] || 'Dashboard';
-  };
-
-  const handleMenuChange = (menuId) => {
-    setCurrentModule(getModuleName(menuId));
-  };
-
-  const renderModule = () => {
-    switch(currentModule) {
-      case 'Dashboard':
-        return <AdminDashboardModule />;
-      
-      // Students group modules
-      case 'Student Registration':
-      case 'Students Data Management':
-      case 'Attendance Management':
-      case 'Learning Progress':
-        return <StudentsModule activeSubModule={getSubModuleId(currentModule)} />;
-      
-      // Classes group modules
-      case 'Schedule Management':
-        return <ClassesModule activeSubModule={getSubModuleId(currentModule)} />;
-      
-      // Single modules
-      case 'Finance Management':
-        return <FinanceModule />;
-      case 'Announcements':
-        return <AnnouncementsModule />;
-      
-      default:
-        return <AdminDashboardModule />;
+  const getModuleName = () => {
+    const path = location.pathname;
+    
+    if (path === '/dashboard/admin' || path === '/dashboard/admin/') {
+      return 'Dashboard';
     }
-  };
-
-  const getSubModuleId = (moduleName) => {
-    const subModuleMap = {
-      'Student Registration': 'student-registration',
-      'Students Data Management': 'student-data',
-      'Attendance Management': 'attendance',
-      'Learning Progress': 'learning-progress',
-      'Schedule Management': 'schedule'
+    
+    const moduleNames = {
+      '/dashboard/admin/students': 'Students Management',
+      '/dashboard/admin/classes': 'Classes Management',
+      '/dashboard/admin/finance': 'Finance Management',
+      '/dashboard/admin/announcements': 'Announcements'
     };
-    return subModuleMap[moduleName] || '';
+    
+    return moduleNames[path] || 'Dashboard';
   };
 
   return (
-    <Layout currentModule={currentModule} onMenuChange={handleMenuChange}>
-      {renderModule()}
+    <Layout currentModule={getModuleName()}>
+      <Outlet />
     </Layout>
   );
 };
