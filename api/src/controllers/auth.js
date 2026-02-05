@@ -25,6 +25,12 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
         message: "Login successful",
         token: token,
+        user: {
+            id: user.user_id,
+            username: user.username,
+            email: user.email,
+            role_id: user.role_id
+        }
     });
 };
 
@@ -43,12 +49,18 @@ export const me = async (req, res) => {
         where: {
             user_id: req.user.userId
         },
-        attributes: { exclude: ["password", "created_at", "updated_at"] }
+        attributes: ["user_id", "username", "email", "role_id"]
     });
     if (!user) {
         return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json({ message: "Login berhasil", user: user });
+    return res.status(200).json({ 
+        message: "Login berhasil", 
+        user: {
+            user_id: user.user_id,
+            username: user.username,
+            email: user.email,
+            role_id: user.role_id
+        }
+    });
 }
-
-

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
+import cors from 'cors';
 
 import userRoute from './src/routes/userRoute.js'
 import authRoute from './src/routes/authRoute.js';
@@ -16,6 +17,11 @@ import Subject from './src/models/subjectModel.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(cors(
+    { origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'] }
+));
 app.use(express.json());
 
 app.get('/', (req, res) => {

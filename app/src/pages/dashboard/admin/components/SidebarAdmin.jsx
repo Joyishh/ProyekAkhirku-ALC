@@ -3,14 +3,17 @@ import { Icon } from '@iconify/react';
 import { Avatar, IconButton, Tooltip } from '@mui/material';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
+import authService from '../../../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
-const SidebarAdmin = ({ onMenuChange, onLogout }) => {
+const SidebarAdmin = ({ onMenuChange }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [expandedGroups, setExpandedGroups] = useState({});
-
-  // User data
+  const navigate = useNavigate();
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  
   const user = {
-    name: 'John Smith',
+    name: userData.username || userData.email || 'Admin',
     role: 'Admin / Owner',
     avatar: null
   };
@@ -86,28 +89,25 @@ const SidebarAdmin = ({ onMenuChange, onLogout }) => {
     });
 
     if (result.isConfirmed) {
-      if (onLogout) {
-        onLogout();
+      try {
+        await authService.logout();
+        
+        toast.success('Logout berhasil', {
+          position: 'top-right',
+          autoClose: 2000,
+        });
+      
+        navigate('/', { replace: true });
+        
+      } catch (error) {
+        console.error("Logout error:", error);
+        localStorage.clear();
+        navigate('/', { replace: true });
       }
-      
-      // Show success toast
-      toast.success('You have successfully logged out', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      
-      // Redirect to login or home page after a short delay
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
     }
   };
 
-  return (
+return (
     <aside className="h-screen w-64 bg-[#162B3A] flex flex-col shadow-lg">
       {/* Logo di bagian atas dengan background terang dan padding */}
       <div className="w-full flex justify-center items-center py-6 px-4">

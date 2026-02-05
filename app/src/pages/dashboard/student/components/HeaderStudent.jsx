@@ -3,12 +3,21 @@
   import { Avatar, IconButton, Badge, Tooltip } from '@mui/material';
   import Swal from 'sweetalert2';
   import { toast } from 'react-toastify';
+  import authService from '../../../../services/authService';
+  import { useNavigate } from 'react-router-dom';
 
-  const HeaderStudent = ({ studentData, currentModule, onMenuChange }) => {
+  const HeaderStudent = ({ studentData, currentModule, onMenuChange}) => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const notificationRef = useRef(null);
+    const navigate = useNavigate();
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
 
+    const user = {
+      name: userData.username || userData.email || 'Student',
+      role: 'Student',
+      avatar: null
+    };
     // Mock notifications data for Student
     const notifications = [
       {
@@ -94,39 +103,37 @@
       }
     };
 
-    const handleLogout = async () => {
-      const result = await Swal.fire({
-        title: 'Konfirmasi Logout',
-        text: 'Apakah Anda yakin ingin keluar?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#135bec',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Ya, Keluar',
-        cancelButtonText: 'Batal',
-        reverseButtons: true
-      });
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Konfirmasi Logout',
+      text: 'Apakah Anda yakin ingin keluar?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#135bec',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Ya, Keluar',
+      cancelButtonText: 'Batal',
+      reverseButtons: true
+    });
 
-      if (result.isConfirmed) {
-        // Add logout logic here (e.g., clear session, redirect to login)
-        console.log('Logout confirmed');
+    if (result.isConfirmed) {
+      try {
+        await authService.logout();
         
-        // Show success toast
-        toast.success('Anda telah berhasil logout', {
+        toast.success('Logout berhasil', {
           position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true
+          autoClose: 2000,
         });
+      
+        navigate('/', { replace: true });
         
-        // Redirect to login or home page after a short delay
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 1000);
+      } catch (error) {
+        console.error("Logout error:", error);
+        localStorage.clear();
+        navigate('/', { replace: true });
       }
-    };
+    }
+  };
 
     const userName = studentData?.name || 'Student';
     const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -361,7 +368,7 @@
           <div className="hidden md:flex items-center gap-2 md:gap-3">
             <div className="hidden lg:flex flex-col items-end">
               <span className="text-xs text-gray-500">Masuk sebagai</span>
-              <span className="text-sm font-semibold text-[#111318]">{userName}</span>
+              <span className="text-sm font-semibold text-[#111318]">{user.name}</span>
             </div>
             
             <Avatar

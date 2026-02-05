@@ -13,16 +13,18 @@ import Box from '@mui/material/Box';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import authService from '../../services/authService';
 
 const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPassword }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Basic validation
@@ -127,14 +129,12 @@ const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPasswor
       return;
     }
 
-    // Hardcoded credentials
-    const credentials = {
-      'admin@example.com': 'admin',
-      'teacher@example.com': 'teacher',
-      'student@example.com': 'student',
-    };
-
-    if (credentials[email] && credentials[email] === password) {
+    // === PANGGIL API UNTUK LOGIN ===
+    setLoading(true);
+    try {
+      const response = await authService.login(email, password);
+      const userData = response.user;
+      
       // Success toast
       toast.success("Login berhasil! Selamat datang!", {
         position: "top-right",
@@ -145,21 +145,24 @@ const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPasswor
         draggable: true,
       });
 
-      // Navigate based on role
+      // Navigate based on role_id dari backend
       setTimeout(() => {
-        if (email === 'admin@example.com') {
+        if (userData.role_id === 1) {
           navigate('/dashboard/admin');
-        } else if (email === 'teacher@example.com') {
+        } else if (userData.role_id === 2) {
           navigate('/dashboard/teacher');
-        } else if (email === 'student@example.com') {
+        } else if (userData.role_id === 3) {
           navigate('/dashboard/student');
+        } else {
+          navigate('/dashboard');
         }
         onClose();
-      }, 1000); // Delay navigation to show success toast
+      }, 1000);
 
-    } else {
-      // Error toast
-      toast.error("Email atau kata sandi salah!", {
+    } catch (error) {
+      // Error toast dengan pesan dari backend
+      const errorMessage = error.message || "Email atau kata sandi salah!";
+      toast.error(errorMessage, {
         position: "top-right",
         autoClose: 4000,
         hideProgressBar: false,
@@ -167,6 +170,8 @@ const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPasswor
         pauseOnHover: true,
         draggable: true,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -296,6 +301,7 @@ const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPasswor
             type="submit"
             variant="contained"
             fullWidth
+            disabled={loading}
             sx={{
               background: "#3b82f6",
               borderRadius: 2,
@@ -309,9 +315,14 @@ const LoginModal = ({ open, onClose, onSwitchToRegister, onSwitchToForgotPasswor
                 color: "#fff",
                 border: "2px solid #2563eb",
               },
+              "&:disabled": {
+                background: "#93c5fd",
+                color: "#fff",
+                border: "2px solid #93c5fd",
+              },
             }}
           >
-            Masuk
+            {loading ? "Memproses..." : "Masuk"}
           </Button>
         </Box>
         <Typography variant="body2" sx={{ mt: 2 }}>

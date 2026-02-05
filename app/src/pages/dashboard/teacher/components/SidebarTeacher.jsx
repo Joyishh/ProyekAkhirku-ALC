@@ -3,8 +3,10 @@ import { Icon } from '@iconify/react';
 import { Avatar, IconButton, Tooltip } from '@mui/material';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
+import authService from '../../../../services/authService';
+import { useNavigate } from 'react-router-dom';
 
-const SidebarTeacher = ({ onMenuChange, currentModule, onLogout, isMobileSidebarOpen, toggleMobileSidebar }) => {
+const SidebarTeacher = ({ onMenuChange, currentModule, isMobileSidebarOpen, toggleMobileSidebar }) => {
   // Convert currentModule back to menuId
   const getMenuIdFromModule = (module) => {
     const moduleToId = {
@@ -15,20 +17,20 @@ const SidebarTeacher = ({ onMenuChange, currentModule, onLogout, isMobileSidebar
     };
     return moduleToId[module] || 'dashboard';
   };
-  
+
+  const navigate = useNavigate();
   const [activeMenu, setActiveMenu] = useState(() => getMenuIdFromModule(currentModule));
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
   
-  // Sync activeMenu dengan currentModule dari parent
   React.useEffect(() => {
     const menuId = getMenuIdFromModule(currentModule);
     setActiveMenu(menuId);
   }, [currentModule]);
 
-  // User data
   const user = {
-    name: 'Bayu Ramadany',
+    name: userData.username || userData.email || 'Teacher',
     role: 'Teacher',
-    avatar: null // Could be URL to profile image
+    avatar: null
   };
 
   const menuItems = [
@@ -85,24 +87,21 @@ const SidebarTeacher = ({ onMenuChange, currentModule, onLogout, isMobileSidebar
     });
 
     if (result.isConfirmed) {
-      if (onLogout) {
-        onLogout();
+      try {
+        await authService.logout();
+        
+        toast.success('Logout berhasil', {
+          position: 'top-right',
+          autoClose: 2000,
+        });
+      
+        navigate('/', { replace: true });
+        
+      } catch (error) {
+        console.error("Logout error:", error);
+        localStorage.clear();
+        navigate('/', { replace: true });
       }
-      
-      // Show success toast
-      toast.success('You have successfully logged out', {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true
-      });
-      
-      // Redirect to login or home page after a short delay
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
     }
   };
 
