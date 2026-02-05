@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import PaymentForm from './views/PaymentForm';
 import Overview from './views/Overview';
 
-const PaymentModule = ({ studentData, onNavigate }) => {
+const PaymentModule = ({ studentData }) => {
   // --- STATE UTAMA ---
   const [viewMode, setViewMode] = useState('overview'); // 'overview' | 'payment'
   const [isSubmitting, setIsSubmitting] = useState(false);
