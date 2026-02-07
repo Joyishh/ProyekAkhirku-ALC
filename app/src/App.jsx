@@ -18,6 +18,9 @@ import TeacherDashboardModule from './pages/dashboard/teacher/modules/Dashboard/
 import MyClassesModule from './pages/dashboard/teacher/modules/MyClasses/MyClassesModule.jsx'
 import TeacherLearningProgressModule from './pages/dashboard/teacher/modules/LearningProgress/LearningProgressModule.jsx'
 import TeacherScheduleModule from './pages/dashboard/teacher/modules/Schedule/ScheduleModule.jsx'
+import StudentDashboardModule from './pages/dashboard/student/modules/Dashboard/StudentDashboardModule.jsx'
+import PaymentModule from './pages/dashboard/student/modules/Payment/PaymentModule.jsx'
+import StudentRegistrationModule from './pages/dashboard/student/modules/Registration/RegistrationModule.jsx'
 
 function App() {
   return (
@@ -55,7 +58,12 @@ function App() {
         <Route path="schedule" element={<TeacherScheduleModule />} />
       </Route>
       
-      <Route path="/dashboard/student" element={<StudentDashboard />} />
+      {/* Student Dashboard*/}
+      <Route path="/dashboard/student" element={<StudentDashboard />}>
+        <Route index element={<StudentDashboardModule />} />
+        <Route path="registration" element={<StudentRegistrationModule />} />
+        <Route path="payment" element={<PaymentModule />} />
+      </Route>
     </Routes>
   )
 }

@@ -55,6 +55,7 @@ const RegistrationStatus = ({
   };
 
   return (
+        <div className="space-y-6">
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
@@ -255,6 +256,7 @@ const RegistrationStatus = ({
         </div>
       </div>
     </div>
+        </div>
   );
 };
 
