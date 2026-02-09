@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 import Menu from './views/Menu';
 import RegisterForm from './views/RegisterForm';
 import ReviewPending from './views/ReviewPending';
+import registrationService from '../../../../../../services/registrationService';
 
 /**
  * RegistrationModule - Controller for student registration workflow
@@ -11,40 +12,8 @@ import ReviewPending from './views/ReviewPending';
  */
 const RegistrationModule = () => {
   const [currentView, setCurrentView] = useState('menu'); // 'menu', 'register', 'review'
-  const [pendingStudents, setPendingStudents] = useState([
-    {
-      id: 1,
-      username: 'ahmad.pratama',
-      email: 'ahmad@email.com',
-      fullName: 'Ahmad Pratama',
-      dateOfBirth: '2008-05-15',
-      gender: 'Laki-laki',
-      address: 'Jl. Merdeka No. 123, Jakarta',
-      parentName: 'Budi Pratama',
-      parentPhone: '081234567890',
-      selectedPackage: 'Paket Reguler SMA',
-      registrationDate: '2024-12-15',
-      status: 'pending',
-      paymentProof: 'https://via.placeholder.com/600x800/4299e1/ffffff?text=Bukti+Transfer+Ahmad',
-      amount: 500000
-    },
-    {
-      id: 2,
-      username: 'siti.nurhaliza',
-      email: 'siti@email.com',
-      fullName: 'Siti Nurhaliza',
-      dateOfBirth: '2007-08-22',
-      gender: 'Perempuan',
-      address: 'Jl. Sudirman No. 456, Bandung',
-      parentName: 'Ibu Siti',
-      parentPhone: '082345678901',
-      selectedPackage: 'Paket Intensif SMA',
-      registrationDate: '2024-12-18',
-      status: 'pending',
-      paymentProof: null,
-      amount: 500000
-    }
-  ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingStudents, setPendingStudents] = useState([]);
 
   const [formData, setFormData] = useState({
     username: '',
@@ -66,7 +35,47 @@ const RegistrationModule = () => {
   const [showProofModal, setShowProofModal] = useState(false);
   const [selectedProofImage, setSelectedProofImage] = useState(null);
 
-  // Package options
+  // Fetch registrations data from API
+  const fetchRegistrations = async () => {
+    try {
+      const response = await registrationService.getAllRegistrations();
+      if (response.success && response.data) {
+        // Transform API data to match component structure
+        const transformedData = response.data.map(reg => ({
+          id: reg.registrationId,
+          userId: reg.userId,
+          username: reg.user?.username || 'N/A',
+          email: reg.user?.email || 'N/A',
+          fullName: reg.studentFullname,
+          dateOfBirth: reg.studentDateOfBirth,
+          gender: reg.studentGender,
+          address: reg.studentAddress,
+          parentName: reg.parentName,
+          parentPhone: reg.parentPhone,
+          selectedPackage: reg.package?.packageName || 'N/A',
+          selectedPackageId: reg.selectedPackageId,
+          paymentMethod: reg.paymentMethod,
+          registrationDate: new Date(reg.createdAt).toLocaleDateString('id-ID'),
+          status: reg.status === 'pending_review' ? 'pending' : reg.status,
+          adminNotes: reg.adminNotes,
+          paymentProof: null // Add payment proof URL if available from backend
+        }));
+        setPendingStudents(transformedData);
+      }
+    } catch (error) {
+      console.error('Error fetching registrations:', error);
+      toast.error('Gagal memuat data pendaftaran');
+    }
+  };
+
+  // Fetch data on component mount and when switching to review view
+  useEffect(() => {
+    if (currentView === 'review') {
+      fetchRegistrations();
+    }
+  }, [currentView]);
+
+  // Package options (deprecated - now fetched from API in RegisterForm)
   const packageOptions = [
     { id: '1', name: 'Paket Reguler SMA', price: 'Rp 750.000' },
     { id: '2', name: 'Paket Intensif SMA', price: 'Rp 950.000' },
@@ -151,50 +160,99 @@ const RegistrationModule = () => {
     return newErrors;
   };
 
-  const handleSubmitRegistration = (e) => {
+  const handleSubmitRegistration = async (e) => {
     e.preventDefault();
     
+    // Client-side validation
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       setErrors(formErrors);
+      // Scroll to first error
+      const firstErrorField = Object.keys(formErrors)[0];
+      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
     
-    // Add to pending students
-    const newStudent = {
-      id: pendingStudents.length + 1,
-      ...formData,
-      registrationDate: new Date().toISOString().split('T')[0],
-      status: 'pending',
-      paymentProof: null,
-      amount: 500000
-    };
+    // Additional password confirmation check
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Password dan konfirmasi password tidak cocok!');
+      return;
+    }
     
-    setPendingStudents(prev => [...prev, newStudent]);
+    setIsSubmitting(true);
     
-    // Reset form
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      fullName: '',
-      dateOfBirth: '',
-      gender: '',
-      address: '',
-      parentName: '',
-      parentPhone: '',
-      selectedPackage: '',
-      paymentMethod: ''
-    });
-    
-    toast.success(
-      <div>
-        <div className="font-semibold">Pendaftaran Siswa berhasil disimpan!</div>
-        <div className="text-sm mt-1">Status: Pending - Menunggu Pembayaran</div>
-      </div>
-    );
-    setCurrentView('menu');
+    try {
+      // Prepare payload
+      const payload = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+        fullName: formData.fullName,
+        dateOfBirth: formData.dateOfBirth,
+        gender: formData.gender,
+        address: formData.address,
+        parentName: formData.parentName,
+        parentPhone: formData.parentPhone,
+        selectedPackage: formData.selectedPackage, // This is the packageId
+        paymentMethod: formData.paymentMethod
+      };
+      
+      const response = await registrationService.createRegistration(payload);
+      
+      // Show success alert
+      await Swal.fire({
+        icon: 'success',
+        title: 'Pendaftaran Berhasil!',
+        text: response.message || 'Data siswa berhasil didaftarkan dan masuk ke antrean review.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#10b981',
+      });
+      
+      // Reset form to initial state
+      setFormData({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        fullName: '',
+        dateOfBirth: '',
+        gender: '',
+        address: '',
+        parentName: '',
+        parentPhone: '',
+        selectedPackage: '',
+        paymentMethod: ''
+      });
+      
+      // Clear any errors
+      setErrors({});
+      
+      // Switch to review view and refresh the data
+      setCurrentView('review');
+      
+      // Fetch updated registrations list
+      await fetchRegistrations();
+      
+    } catch (error) {
+      // Show error message from backend
+      const errorMessage = error.message || 'Terjadi kesalahan saat mendaftarkan siswa. Silakan coba lagi.';
+      console.error('Displaying error message to user:', errorMessage);
+      
+      toast.error(errorMessage, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleApprove = async (studentId) => {
@@ -210,24 +268,26 @@ const RegistrationModule = () => {
     });
 
     if (result.isConfirmed) {
-      setPendingStudents(prev =>
-        prev.map(student =>
-          student.id === studentId ? { ...student, status: 'active' } : student
-        )
-      );
-      toast.success(
-        <div>
-          <div className="font-semibold">Pendaftaran siswa disetujui!</div>
-          <div className="text-sm mt-1">Status: Active - Siswa telah terdaftar</div>
-        </div>
-      );
+      try {
+        await registrationService.updateRegistrationStatus(studentId, { status: 'approved' });
+        toast.success(
+          <div>
+            <div className="font-semibold">Pendaftaran siswa disetujui!</div>
+            <div className="text-sm mt-1">Status: Approved - Siswa telah terdaftar</div>
+          </div>
+        );
+        // Refresh data
+        await fetchRegistrations();
+      } catch (error) {
+        toast.error(error.message || 'Gagal menyetujui pendaftaran');
+      }
     }
   };
 
   const handleReject = async (studentId) => {
     const result = await Swal.fire({
       title: 'Tolak Pendaftaran?',
-      text: 'Apakah Anda yakin ingin menolak pendaftaran calon siswa ini? Data akan dihapus dari daftar.',
+      text: 'Apakah Anda yakin ingin menolak pendaftaran calon siswa ini?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Ya, Tolak',
@@ -237,8 +297,14 @@ const RegistrationModule = () => {
     });
 
     if (result.isConfirmed) {
-      setPendingStudents(prev => prev.filter(student => student.id !== studentId));
-      toast.error('Pendaftaran siswa ditolak dan dihapus!');
+      try {
+        await registrationService.updateRegistrationStatus(studentId, { status: 'rejected' });
+        toast.error('Pendaftaran siswa ditolak!');
+        // Refresh data
+        await fetchRegistrations();
+      } catch (error) {
+        toast.error(error.message || 'Gagal menolak pendaftaran');
+      }
     }
   };
 
@@ -290,6 +356,7 @@ const RegistrationModule = () => {
           onInputChange={handleInputChange}
           onSubmit={handleSubmitRegistration}
           onCancel={() => setCurrentView('menu')}
+          isSubmitting={isSubmitting}
         />
       )}
 
