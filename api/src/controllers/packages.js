@@ -44,6 +44,30 @@ export const getAllPackages = async (req, res) => {
     }
 };
 
+export const getActivePackages = async (req, res) => {
+    try {
+        const packages = await Package.findAll({
+            where: {
+                isActive: true
+            },
+            attributes: ['packageId', 'packageName', 'basePrice', 'description'],
+            order: [['packageName', 'ASC']],
+        });
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Paket aktif berhasil diambil',
+            data: packages 
+        });
+    } catch (error) {
+        console.error('Error saat mengambil paket aktif:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server.', 
+            error: error.message 
+        });
+    }
+};
+
 export const getPackageById = async (req, res) => {
     const { packageId } = req.params;
     try {

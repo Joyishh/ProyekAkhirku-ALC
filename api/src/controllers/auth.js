@@ -44,6 +44,75 @@ export const logoutUser = (req, res) => {
     res.status(200).json({ message: "Logout successful." });
 };
 
+export const register = async (req, res) => {
+    try {
+        const { username, email, password, confPassword } = req.body;
+
+        if (!username || !email || !password || !confPassword) {
+            return res.status(400).json({ 
+                message: "Semua field harus diisi (username, email, password, confPassword)" 
+            });
+        }
+
+        if (password !== confPassword) {
+            return res.status(400).json({ 
+                message: "Password dan konfirmasi password tidak cocok" 
+            });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ 
+                message: "Password minimal 8 karakter" 
+            });
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ 
+                message: "Format email tidak valid" 
+            });
+        }
+
+        const existingUsername = await Users.findOne({
+            where: { username: username }
+        });
+        if (existingUsername) {
+            return res.status(400).json({ 
+                message: "Username sudah digunakan" 
+            });
+        }
+
+        const existingEmail = await Users.findOne({
+            where: { email: email }
+        });
+        if (existingEmail) {
+            return res.status(400).json({ 
+                message: "Email sudah terdaftar" 
+            });
+        }
+
+        const hashedPassword = await argon2.hash(password);
+
+        await Users.create({
+            username: username,
+            email: email,
+            password: hashedPassword,
+            role_id: 3
+        });
+
+        return res.status(201).json({ 
+            message: "Registrasi berhasil, silakan login" 
+        });
+
+    } catch (error) {
+        console.error("Registration error:", error);
+        return res.status(500).json({ 
+            message: "Terjadi kesalahan pada server",
+            error: error.message 
+        });
+    }
+};
+
 export const me = async (req, res) => {
     const user = await Users.findOne({
         where: {

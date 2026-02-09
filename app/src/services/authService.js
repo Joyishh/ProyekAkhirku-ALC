@@ -43,6 +43,22 @@ const authService = {
     }
   },
 
+  // Register user
+  register: async (username, email, password, confPassword) => {
+    try {
+      const response = await api.post('/auth/register', {
+        username,
+        email,
+        password,
+        confPassword,
+      });
+      
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { message: 'Registration failed' };
+    }
+  },
+
   // Get current user info
   getCurrentUser: async () => {
     try {

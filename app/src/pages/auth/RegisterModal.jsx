@@ -8,12 +8,15 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-toastify';
+import authService from '../../services/authService';
 
 const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +25,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validasi username
@@ -193,26 +196,53 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
       return;
     }
     
-    // Simulasi registrasi berhasil
-    toast.success('Registrasi berhasil! Selamat bergabung!', {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+    // Call API to register
+    setIsLoading(true);
     
-    // Reset form
-    setUsername('');
-    setEmail('');
-    setPassword('');
-    setConfirmPassword('');
-    
-    // Tutup modal setelah delay
-    setTimeout(() => {
+    try {
+      const response = await authService.register(username, email, password, confirmPassword);
+      
+      // Reset form
+      setUsername('');
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
+      
+      // Close modal first to avoid z-index issues
       onClose();
-    }, 2000);
+      
+      // Show success toast notification
+      toast.success(response.message || 'Registrasi berhasil! Silakan login dengan akun Anda.', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // Wait a bit then switch to login modal
+      setTimeout(() => {
+        if (onSwitchToLogin) {
+          onSwitchToLogin();
+        }
+      }, 500);
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      // Show error toast (modal still open so user can fix the error)
+      toast.error(error.message || 'Terjadi kesalahan saat mendaftar. Silakan coba lagi.', {
+        position: 'top-right',
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -229,6 +259,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
       <IconButton
         aria-label="close"
         onClick={onClose}
+        disabled={isLoading}
         sx={{ position: "absolute", right: 16, top: 16, color: "grey.500" }}
       >
         <Icon icon="material-symbols:close" width={24} height={24} />
@@ -258,6 +289,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             size="small"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={isLoading}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
@@ -280,6 +312,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             size="small"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
@@ -302,6 +335,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             size="small"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
@@ -316,7 +350,11 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
+                  <IconButton 
+                    onClick={handleClickShowPassword} 
+                    edge="end"
+                    disabled={isLoading}
+                  >
                     <Icon
                       icon={
                         showPassword
@@ -341,6 +379,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             size="small"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={isLoading}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "8px",
@@ -358,6 +397,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
                   <IconButton
                     onClick={handleClickShowConfirmPassword}
                     edge="end"
+                    disabled={isLoading}
                   >
                     <Icon
                       icon={
@@ -377,6 +417,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
             type="submit"
             variant="contained"
             fullWidth
+            disabled={isLoading}
             sx={{
               background: "#3b82f6",
               borderRadius: 2,
@@ -391,9 +432,18 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
                 color: "#fff",
                 border: "2px solid #2563eb",
               },
+              "&:disabled": {
+                background: "#93c5fd",
+                color: "#fff",
+                border: "2px solid #93c5fd",
+              },
             }}
           >
-            Daftar
+            {isLoading ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              'Daftar'
+            )}
           </Button>
         </Box>
         <Typography variant="body2" sx={{ mt: 2 }}>
@@ -401,6 +451,7 @@ const RegisterModal = ({ open, onClose, onSwitchToLogin }) => {
           <Button
             variant="text"
             size="small"
+            disabled={isLoading}
             sx={{
               textTransform: "none",
               color: "#3b82f6",

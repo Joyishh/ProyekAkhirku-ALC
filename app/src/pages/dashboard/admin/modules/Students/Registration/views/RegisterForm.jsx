@@ -1,13 +1,14 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
-import { TextField, MenuItem } from '@mui/material';
+import { TextField, MenuItem, CircularProgress } from '@mui/material';
+import { toast } from 'react-toastify';
+import packageService from '../../../../../../../services/packageService';
 
 /**
  * RegisterForm - Registration form for new students
  * @param {Object} props
  * @param {Object} props.formData - Form data object
  * @param {Object} props.errors - Form validation errors
- * @param {Array} props.packageOptions - Available package options
  * @param {Function} props.onInputChange - Handler for input changes
  * @param {Function} props.onSubmit - Handler for form submission
  * @param {Function} props.onCancel - Handler to cancel and go back
@@ -15,11 +16,49 @@ import { TextField, MenuItem } from '@mui/material';
 const RegisterForm = ({ 
   formData, 
   errors, 
-  packageOptions, 
   onInputChange, 
   onSubmit, 
   onCancel 
 }) => {
+  const [packages, setPackages] = useState([]);
+  const [isLoadingPackages, setIsLoadingPackages] = useState(true);
+
+  // Fetch packages on component mount
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setIsLoadingPackages(true);
+        const response = await packageService.getAllPackages();
+        
+        if (response.success && response.data) {
+          setPackages(response.data);
+        } else {
+          toast.error('Gagal memuat data paket');
+        }
+      } catch (error) {
+        console.error('Error loading packages:', error);
+        toast.error(error.message || 'Gagal memuat data paket');
+      } finally {
+        setIsLoadingPackages(false);
+      }
+      
+    };
+
+    fetchPackages();
+    
+  }, []);
+
+  // Format rupiah currency
+  const formatRupiah = (amount) => {
+    if (!amount) return 'Rp 0';
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header with Back Button */}
@@ -30,8 +69,12 @@ const RegisterForm = ({
               <Icon icon="mdi:account-plus" className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Register New Student</h1>
-              <p className="text-gray-600">Fill in student information to create a new registration</p>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Register New Student
+              </h1>
+              <p className="text-gray-600">
+                Fill in student information to create a new registration
+              </p>
             </div>
           </div>
           <button
@@ -45,11 +88,17 @@ const RegisterForm = ({
       </div>
 
       {/* Registration Form */}
-      <form onSubmit={onSubmit} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <form
+        onSubmit={onSubmit}
+        className="bg-white rounded-xl p-6 shadow-sm border border-gray-100"
+      >
         {/* Section 1: Account Information */}
         <div className="mb-8">
           <div className="flex items-center mb-6 pb-3 border-b-2 border-blue-500">
-            <Icon icon="mdi:account-key" className="w-6 h-6 text-blue-600 mr-2" />
+            <Icon
+              icon="mdi:account-key"
+              className="w-6 h-6 text-blue-600 mr-2"
+            />
             <h3 className="text-xl font-bold text-gray-800">Akun Siswa</h3>
           </div>
 
@@ -67,17 +116,17 @@ const RegisterForm = ({
               error={!!errors.username}
               helperText={errors.username}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -95,17 +144,17 @@ const RegisterForm = ({
               error={!!errors.email}
               helperText={errors.email}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -123,17 +172,17 @@ const RegisterForm = ({
               error={!!errors.password}
               helperText={errors.password}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -151,17 +200,17 @@ const RegisterForm = ({
               error={!!errors.confirmPassword}
               helperText={errors.confirmPassword}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
           </div>
@@ -170,8 +219,13 @@ const RegisterForm = ({
         {/* Section 2: Personal Data & Package */}
         <div className="mb-8">
           <div className="flex items-center mb-6 pb-3 border-b-2 border-blue-500">
-            <Icon icon="mdi:account-details" className="w-6 h-6 text-blue-600 mr-2" />
-            <h3 className="text-xl font-bold text-gray-800">Data Pribadi & Paket</h3>
+            <Icon
+              icon="mdi:account-details"
+              className="w-6 h-6 text-blue-600 mr-2"
+            />
+            <h3 className="text-xl font-bold text-gray-800">
+              Data Pribadi & Paket
+            </h3>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -188,17 +242,17 @@ const RegisterForm = ({
               error={!!errors.fullName}
               helperText={errors.fullName}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -216,17 +270,17 @@ const RegisterForm = ({
               error={!!errors.dateOfBirth}
               helperText={errors.dateOfBirth}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -243,17 +297,17 @@ const RegisterForm = ({
               error={!!errors.gender}
               helperText={errors.gender}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             >
               <MenuItem value="">Pilih jenis kelamin</MenuItem>
@@ -261,7 +315,7 @@ const RegisterForm = ({
               <MenuItem value="Perempuan">Perempuan</MenuItem>
             </TextField>
 
-            {/* Package Selection */}
+            {/* Package Selection - Now with API data */}
             <TextField
               select
               fullWidth
@@ -274,25 +328,60 @@ const RegisterForm = ({
               error={!!errors.selectedPackage}
               helperText={errors.selectedPackage}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              disabled={isLoadingPackages}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: {
+                      maxHeight: 300,
+                    },
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  anchorOrigin: {
+                    vertical: "bottom",
+                    horizontal: "left",
                   },
-                } 
+                  transformOrigin: {
+                    vertical: "top",
+                    horizontal: "left",
+                  },
+                },
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
+                  },
+                },
               }}
             >
-              <MenuItem value="">Pilih paket belajar</MenuItem>
-              {packageOptions.map((pkg) => (
-                <MenuItem key={pkg.id} value={pkg.name}>
-                  {pkg.name} - {pkg.price}
+              {isLoadingPackages ? (
+                <MenuItem value="">
+                  <div className="flex items-center gap-2">
+                    <CircularProgress size={16} />
+                    <span>Loading packages...</span>
+                  </div>
                 </MenuItem>
-              ))}
+              ) : packages.length === 0 ? (
+                <MenuItem value="">
+                  <span className="text-gray-500">No packages available</span>
+                </MenuItem>
+              ) : (
+                [
+                  <MenuItem key="default-option" value="">
+                    Pilih paket belajar
+                  </MenuItem>,
+                  ...packages.map((pkg) => (
+                    <MenuItem key={pkg.packageId} value={String(pkg.packageId)}>
+                      {pkg.packageName} - {formatRupiah(pkg.basePrice)}
+                    </MenuItem>
+                  )),
+                ]
+              )}
             </TextField>
 
             {/* Payment Method */}
@@ -308,17 +397,17 @@ const RegisterForm = ({
               error={!!errors.paymentMethod}
               helperText={errors.paymentMethod}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             >
               <MenuItem value="">Pilih metode pembayaran</MenuItem>
@@ -342,17 +431,17 @@ const RegisterForm = ({
                 error={!!errors.address}
                 helperText={errors.address}
                 required
-                sx={{ 
-                  '& .MuiOutlinedInput-root': { 
-                    borderRadius: '8px',
-                    '&:hover fieldset': {
-                      borderColor: '#3b82f6',
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    "&:hover fieldset": {
+                      borderColor: "#3b82f6",
                     },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#3b82f6',
-                      borderWidth: '2px',
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#3b82f6",
+                      borderWidth: "2px",
                     },
-                  } 
+                  },
                 }}
               />
             </div>
@@ -370,17 +459,17 @@ const RegisterForm = ({
               error={!!errors.parentName}
               helperText={errors.parentName}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
 
@@ -398,17 +487,17 @@ const RegisterForm = ({
               error={!!errors.parentPhone}
               helperText={errors.parentPhone}
               required
-              sx={{ 
-                '& .MuiOutlinedInput-root': { 
-                  borderRadius: '8px',
-                  '&:hover fieldset': {
-                    borderColor: '#3b82f6',
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "8px",
+                  "&:hover fieldset": {
+                    borderColor: "#3b82f6",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#3b82f6',
-                    borderWidth: '2px',
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#3b82f6",
+                    borderWidth: "2px",
                   },
-                } 
+                },
               }}
             />
           </div>
