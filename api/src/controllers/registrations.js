@@ -1,6 +1,9 @@
 import Users from "../models/userModel.js";
 import Registration from "../models/registrationModel.js";
 import Package from "../models/packageModel.js";
+import Student from "../models/studentModel.js";
+import StudentParent from "../models/studentParentModel.js";
+import StudentEnrollment from "../models/studentEnrollmentModel.js";
 import argon2 from "argon2";
 import db from "../config/database.js";
 
@@ -254,41 +257,174 @@ export const getRegistrationById = async (req, res) => {
 /**
  * Update registration status (approve/reject)
  */
+
 export const updateRegistrationStatus = async (req, res) => {
+    const t = await db.transaction();
+    
     try {
         const { registrationId } = req.params;
         const { status, adminNotes } = req.body;
 
         // Validate status value
         if (!['pending_review', 'approved', 'rejected'].includes(status)) {
+            await t.rollback();
             return res.status(400).json({
                 success: false,
                 message: "Status tidak valid. Gunakan: pending_review, approved, atau rejected"
             });
         }
 
-        const registration = await Registration.findByPk(registrationId);
+        // Find registration with user data
+        const registration = await Registration.findByPk(registrationId, {
+            include: [
+                {
+                    model: Users,
+                    as: 'user',
+                    attributes: ['user_id', 'username', 'email', 'role_id']
+                }
+            ],
+            transaction: t
+        });
 
         if (!registration) {
+            await t.rollback();
             return res.status(404).json({
                 success: false,
                 message: "Pendaftaran tidak ditemukan"
             });
         }
 
+        // Handle APPROVAL logic
+        if (status === 'approved') {
+            // Validation: Check if student already exists (prevent double insertion)
+            const existingStudent = await Student.findOne({
+                where: { userId: registration.userId },
+                transaction: t
+            });
+
+            if (existingStudent) {
+                await t.rollback();
+                return res.status(400).json({
+                    success: false,
+                    message: "Siswa sudah terdaftar. Tidak dapat approve pendaftaran yang sama dua kali."
+                });
+            }
+
+            // Validate package exists
+            const packageExists = await Package.findByPk(registration.selectedPackageId, { 
+                transaction: t 
+            });
+            if (!packageExists) {
+                await t.rollback();
+                return res.status(400).json({
+                    success: false,
+                    message: "Paket yang dipilih tidak valid"
+                });
+            }
+
+            // Transform gender to single character (database constraint: CHAR(1))
+            // "Laki-laki" -> "L", "Perempuan" -> "P"
+            let genderCode = registration.studentGender.trim().toUpperCase().charAt(0);
+            if (genderCode !== 'L' && genderCode !== 'P') {
+                // Fallback: detect from full string
+                genderCode = registration.studentGender.toLowerCase().includes('laki') ? 'L' : 'P';
+            }
+
+            // 1. Create Student record
+            const newStudent = await Student.create({
+                userId: registration.userId,
+                fullname: registration.studentFullname,
+                dateOfBirth: registration.studentDateOfBirth,
+                gender: genderCode,
+                address: registration.studentAddress,
+                classLevel: null // Can be set later by admin
+            }, { transaction: t });
+
+            // 2. Create StudentParent record
+            await StudentParent.create({
+                studentId: newStudent.studentId,
+                parentName: registration.parentName,
+                parentPhone: registration.parentPhone
+            }, { transaction: t });
+
+            // 3. Create StudentEnrollment record
+            await StudentEnrollment.create({
+                studentId: newStudent.studentId,
+                packageId: registration.selectedPackageId,
+                status: 'aktif',
+                enrollmentDate: new Date()
+            }, { transaction: t });
+
+            // 4. Update User role to Student (role_id = 3)
+            await Users.update(
+                { role_id: 3 },
+                { 
+                    where: { user_id: registration.userId },
+                    transaction: t 
+                }
+            );
+
+            // 5. Update Registration status
+            registration.status = status;
+            if (adminNotes) {
+                registration.adminNotes = adminNotes;
+            }
+            await registration.save({ transaction: t });
+
+            await t.commit();
+
+            return res.status(200).json({
+                success: true,
+                message: "Pendaftaran berhasil disetujui. Siswa telah terdaftar dalam sistem.",
+                data: {
+                    registrationId: registration.registrationId,
+                    studentId: newStudent.studentId,
+                    userId: registration.userId,
+                    fullname: newStudent.fullname,
+                    status: registration.status
+                }
+            });
+        }
+
+        // Handle REJECTION or other status updates
         registration.status = status;
         if (adminNotes) {
             registration.adminNotes = adminNotes;
         }
-        await registration.save();
+        await registration.save({ transaction: t });
+
+        await t.commit();
 
         return res.status(200).json({
             success: true,
-            message: `Pendaftaran berhasil di${status === 'approved' ? 'setujui' : status === 'rejected' ? 'tolak' : 'update'}`,
-            data: registration
+            message: `Pendaftaran berhasil di${status === 'rejected' ? 'tolak' : 'update'}`,
+            data: {
+                registrationId: registration.registrationId,
+                userId: registration.userId,
+                status: registration.status,
+                adminNotes: registration.adminNotes
+            }
         });
+
     } catch (error) {
+        await t.rollback();
         console.error("Update registration status error:", error);
+
+        // Handle specific Sequelize errors
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({
+                success: false,
+                message: "Data siswa sudah terdaftar dalam sistem"
+            });
+        }
+
+        if (error.name === 'SequelizeForeignKeyConstraintError') {
+            return res.status(400).json({
+                success: false,
+                message: "Referensi data tidak valid (User atau Package tidak ditemukan)"
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Terjadi kesalahan saat mengupdate status pendaftaran",

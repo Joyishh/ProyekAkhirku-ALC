@@ -10,6 +10,7 @@ import subjectRoute from './src/routes/subjectRoute.js'
 import packageRoute from './src/routes/packageRoute.js'
 import packageItemRoute from './src/routes/packageItemRouter.js'
 import registrationRoute from './src/routes/registrationRoute.js'
+import dashboardRoute from './src/routes/dashboardRoute.js'
 
 import Package from './src/models/packageModel.js';
 import PackageItem from './src/models/packageItemModel.js';
@@ -40,6 +41,7 @@ app.use('/subject', subjectRoute)
 app.use('/package', packageRoute)
 app.use('/package-item', packageItemRoute)
 app.use('/registration', registrationRoute)
+app.use('/dashboard', dashboardRoute)
 
 // Inisialisasi asosiasi antar model
 Package.associate({ PackageItem });

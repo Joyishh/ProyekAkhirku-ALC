@@ -1,23 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
+import dashboardService from '../../../../../../../services/dashboardService';
+import { toast } from 'react-toastify';
 
 /**
  * Menu - Initial menu displaying statistics and navigation buttons
  * @param {Object} props
- * @param {number} props.pendingCount - Number of pending registrations
- * @param {number} props.activeCount - Number of active students
- * @param {number} props.totalCount - Total number of registrations
  * @param {Function} props.onNavigateRegister - Handler to navigate to register form
  * @param {Function} props.onNavigateReview - Handler to navigate to review pending
  */
 const Menu = ({ 
-  pendingCount, 
-  activeCount, 
-  totalCount, 
   onNavigateRegister, 
   onNavigateReview 
 }) => {
+  // State for KPI data
+  const [kpiData, setKpiData] = useState({
+    pendingCount: 0,
+    activeStudentCount: 0,
+    totalRegistrations: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dashboard stats on component mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const response = await dashboardService.getAdminStats();
+        
+        if (response.success && response.data) {
+          setKpiData({
+            pendingCount: response.data.pendingCount || 0,
+            activeStudentCount: response.data.activeStudentCount || 0,
+            totalRegistrations: response.data.totalRegistrations || 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+        toast.error('Gagal memuat statistik dashboard');
+        // Keep default values (0) on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* Module Header */}
@@ -34,7 +64,13 @@ const Menu = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Total Pending</p>
-              <p className="text-3xl font-bold text-orange-600">{pendingCount}</p>
+              <p className="text-3xl font-bold text-orange-600">
+                {loading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  kpiData.pendingCount
+                )}
+              </p>
             </div>
             <div className="p-3 bg-orange-100 rounded-lg">
               <Icon icon="mdi:account-clock" className="w-8 h-8 text-orange-600" />
@@ -46,7 +82,13 @@ const Menu = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Active Students</p>
-              <p className="text-3xl font-bold text-green-600">{activeCount}</p>
+              <p className="text-3xl font-bold text-green-600">
+                {loading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  kpiData.activeStudentCount
+                )}
+              </p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
               <Icon icon="mdi:account-check" className="w-8 h-8 text-green-600" />
@@ -58,7 +100,13 @@ const Menu = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Total Registrations</p>
-              <p className="text-3xl font-bold text-blue-600">{totalCount}</p>
+              <p className="text-3xl font-bold text-blue-600">
+                {loading ? (
+                  <span className="animate-pulse">...</span>
+                ) : (
+                  kpiData.totalRegistrations
+                )}
+              </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-lg">
               <Icon icon="mdi:account-group" className="w-8 h-8 text-blue-600" />
@@ -93,9 +141,10 @@ const Menu = ({
           <button 
             onClick={onNavigateReview}
             className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center cursor-pointer"
+            disabled={loading}
           >
             <Icon icon="mdi:clipboard-list" className="w-5 h-5 mr-2" />
-            Review Pending ({pendingCount})
+            Review Pending ({loading ? '...' : kpiData.pendingCount})
           </button>
         </div>
       </div>
