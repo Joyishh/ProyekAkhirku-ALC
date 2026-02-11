@@ -41,15 +41,25 @@ const DataTable = ({
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <Icon icon="mdi:magnify" width={20} className="text-gray-400" />
+                      <Icon
+                        icon="mdi:magnify"
+                        width={20}
+                        className="text-gray-400"
+                      />
                     </InputAdornment>
                   ),
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
-                    "&:hover fieldset": { borderColor: "#6366f1" },
-                    "&.Mui-focused fieldset": { borderColor: "#4f46e5", borderWidth: "2px" },
+                    backgroundColor: "#f9fafb",
+                    "&:hover fieldset": {
+                      borderColor: "#10b981",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#10b981",
+                      borderWidth: "2px",
+                    },
                   },
                 }}
               />
@@ -75,7 +85,7 @@ const DataTable = ({
                 <th
                   key={index}
                   className={`px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                    col.align === 'center' ? 'text-center' : 'text-left'
+                    col.align === "center" ? "text-center" : "text-left"
                   }`}
                 >
                   {col.header}
@@ -86,19 +96,28 @@ const DataTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-6 py-12 text-center text-gray-500">
-                  <Icon icon="mdi:school-outline" className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+                <td
+                  colSpan={columns.length}
+                  className="px-6 py-12 text-center text-gray-500"
+                >
+                  <Icon
+                    icon="mdi:school-outline"
+                    className="w-16 h-16 text-gray-300 mx-auto mb-3"
+                  />
                   <p className="text-gray-500 font-medium">No records found</p>
                 </td>
               </tr>
             ) : (
               data.map((row, rowIndex) => (
-                <tr key={rowIndex} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={rowIndex}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   {columns.map((col, colIndex) => (
                     <td
                       key={colIndex}
                       className={`px-6 py-4 whitespace-nowrap ${
-                        col.align === 'center' ? 'text-center' : 'text-left'
+                        col.align === "center" ? "text-center" : "text-left"
                       }`}
                     >
                       {/* Render custom cell content if provided, else just show text */}
@@ -123,10 +142,11 @@ const DataTable = ({
         rowsPerPageOptions={[10, 25, 50]}
         sx={{
           borderTop: "1px solid #e5e7eb",
-          ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
-            marginTop: "14px",
-            marginBottom: "14px",
-          },
+          ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+            {
+              marginTop: "14px",
+              marginBottom: "14px",
+            },
         }}
       />
     </div>

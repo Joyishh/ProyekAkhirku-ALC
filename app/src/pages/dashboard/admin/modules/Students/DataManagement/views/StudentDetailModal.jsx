@@ -1,21 +1,199 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
-import { TextField, MenuItem } from '@mui/material';
+import { TextField, MenuItem, CircularProgress } from '@mui/material';
+import studentService from '../../../../../../../services/studentService';
+import { toast } from 'react-toastify';
 
 const StudentDetailModal = ({
   isOpen,
-  selectedStudent,
-  isEditMode,
-  editFormData,
-  isSaving,
+  studentId,
   onClose,
-  onEditToggle,
-  onSaveChanges,
-  onCancelEdit,
-  onDelete,
-  onInputChange
+  onSaveSuccess
 }) => {
-  if (!isOpen || !selectedStudent) return null;
+  // State management
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    username: '',
+    dob: '',
+    gender: '',
+    address: '',
+    classLevel: '',
+    parentName: '',
+    parentPhone: '',
+    status: '',
+    program: ''
+  });
+
+  // Fetch student detail when modal opens or studentId changes
+  useEffect(() => {
+    const fetchStudentDetail = async () => {
+      try {
+        setLoading(true);
+        const response = await studentService.getStudentDetail(studentId);
+        
+        if (response.success && response.data) {
+          const student = response.data;
+          setSelectedStudent(student);
+          
+          // Initialize edit form data
+          setEditFormData({
+            name: student.fullname || '',
+            email: student.user?.email || '',
+            username: student.user?.username || '',
+            dob: student.dateOfBirth || '',
+            gender: student.genderDisplay || '',
+            address: student.address || '',
+            classLevel: student.classLevel || '',
+            parentName: student.parent?.parentName || '',
+            parentPhone: student.parent?.parentPhone || '',
+            status: student.enrollments?.[0]?.status || 'inactive',
+            program: student.activeProgram || ''
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch student detail:', error);
+        toast.error('Gagal memuat detail siswa');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isOpen && studentId) {
+      fetchStudentDetail();
+    }
+  }, [isOpen, studentId]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const onEditToggle = () => {
+    setIsEditMode(!isEditMode);
+    if (!isEditMode) {
+      // Reset form data when entering edit mode
+      setEditFormData({
+        name: selectedStudent.fullname || '',
+        email: selectedStudent.user?.email || '',
+        username: selectedStudent.user?.username || '',
+        dob: selectedStudent.dateOfBirth || '',
+        gender: selectedStudent.genderDisplay || '',
+        address: selectedStudent.address || '',
+        classLevel: selectedStudent.classLevel || '',
+        parentName: selectedStudent.parent?.parentName || '',
+        parentPhone: selectedStudent.parent?.parentPhone || '',
+        status: selectedStudent.enrollments?.[0]?.status || 'inactive',
+        program: selectedStudent.activeProgram || ''
+      });
+    }
+  };
+
+  const onCancelEdit = () => {
+    setIsEditMode(false);
+    // Reset form data to original values
+    if (selectedStudent) {
+      setEditFormData({
+        name: selectedStudent.fullname || '',
+        email: selectedStudent.user?.email || '',
+        username: selectedStudent.user?.username || '',
+        dob: selectedStudent.dateOfBirth || '',
+        gender: selectedStudent.genderDisplay || '',
+        address: selectedStudent.address || '',
+        classLevel: selectedStudent.classLevel || '',
+        parentName: selectedStudent.parent?.parentName || '',
+        parentPhone: selectedStudent.parent?.parentPhone || '',
+        status: selectedStudent.enrollments?.[0]?.status || 'inactive',
+        program: selectedStudent.activeProgram || ''
+      });
+    }
+  };
+
+  const onSaveChanges = async () => {
+    try {
+      setIsSaving(true);
+
+      // Prepare update payload
+      const updatePayload = {
+        fullname: editFormData.name,
+        dateOfBirth: editFormData.dob,
+        gender: editFormData.gender,
+        address: editFormData.address,
+        classLevel: editFormData.classLevel,
+        parentName: editFormData.parentName,
+        parentPhone: editFormData.parentPhone
+      };
+
+      const response = await studentService.updateStudent(studentId, updatePayload);
+
+      if (response.success) {
+        toast.success('Data siswa berhasil diperbarui');
+        setIsEditMode(false);
+        
+        // Refresh student detail
+        const refreshResponse = await studentService.getStudentDetail(studentId);
+        if (refreshResponse.success && refreshResponse.data) {
+          const student = refreshResponse.data;
+          setSelectedStudent(student);
+          
+          setEditFormData({
+            name: student.fullname || '',
+            email: student.user?.email || '',
+            username: student.user?.username || '',
+            dob: student.dateOfBirth || '',
+            gender: student.genderDisplay || '',
+            address: student.address || '',
+            classLevel: student.classLevel || '',
+            parentName: student.parent?.parentName || '',
+            parentPhone: student.parent?.parentPhone || '',
+            status: student.enrollments?.[0]?.status || 'inactive',
+            program: student.activeProgram || ''
+          });
+        }
+        
+        // Notify parent component
+        if (onSaveSuccess) {
+          onSaveSuccess();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update student:', error);
+      toast.error(error.message || 'Gagal memperbarui data siswa');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const onDelete = () => {
+    // TODO: Implement delete functionality
+    toast.info('Delete functionality will be implemented');
+  };
+
+  if (!isOpen) return null;
+
+  // Loading state
+  if (loading) {
+    return (
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" 
+        onClick={onClose}
+      >
+        <div className="bg-white rounded-xl shadow-2xl p-8 flex flex-col items-center">
+          <CircularProgress size={50} sx={{ color: '#10b981' }} />
+          <p className="mt-4 text-gray-600">Loading student details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!selectedStudent) return null;
 
   return (
     <div 
@@ -103,21 +281,14 @@ const StudentDetailModal = ({
                 size="small"
                 label="Username"
                 name="username"
-                value={isEditMode ? editFormData.username : selectedStudent.username}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.username : selectedStudent.user?.username || 'N/A'}
+                onChange={handleInputChange}
                 variant="outlined"
-                InputProps={{ readOnly: !isEditMode }}
+                InputProps={{ readOnly: true }} // Username cannot be changed
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
-                    backgroundColor: !isEditMode ? '#f9fafb' : 'transparent',
-                    '&:hover fieldset': {
-                      borderColor: isEditMode ? '#10b981' : '#e5e7eb',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#10b981',
-                      borderWidth: '2px',
-                    },
+                    backgroundColor: '#f9fafb',
                   },
                 }}
               />
@@ -129,79 +300,44 @@ const StudentDetailModal = ({
                 label="Email"
                 name="email"
                 type="email"
-                value={isEditMode ? editFormData.email : selectedStudent.email}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.email : selectedStudent.user?.email || 'N/A'}
+                onChange={handleInputChange}
                 variant="outlined"
-                InputProps={{ readOnly: !isEditMode }}
+                InputProps={{ readOnly: true }} // Email cannot be changed here
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: '8px',
-                    backgroundColor: !isEditMode ? '#f9fafb' : 'transparent',
-                    '&:hover fieldset': {
-                      borderColor: isEditMode ? '#10b981' : '#e5e7eb',
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#10b981',
-                      borderWidth: '2px',
-                    },
+                    backgroundColor: '#f9fafb',
                   },
                 }}
               />
 
               {/* Status */}
-              {isEditMode ? (
-                <TextField
-                  select
-                  fullWidth
-                  size="small"
-                  label="Status"
-                  name="status"
-                  value={editFormData.status}
-                  onChange={onInputChange}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                      '&:hover fieldset': {
-                        borderColor: '#10b981',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#10b981',
-                        borderWidth: '2px',
-                      },
+              <TextField
+                fullWidth
+                size="small"
+                label="Status"
+                value={selectedStudent.enrollments?.[0]?.status === 'aktif' ? 'Active' : 'Inactive'}
+                variant="outlined"
+                InputProps={{ readOnly: true }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    backgroundColor: selectedStudent.enrollments?.[0]?.status === 'aktif' ? '#d1fae5' : '#fee2e2',
+                    '& input': {
+                      color: selectedStudent.enrollments?.[0]?.status === 'aktif' ? '#065f46' : '#991b1b',
+                      fontWeight: 600,
                     },
-                  }}
-                >
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                </TextField>
-              ) : (
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Status"
-                  value={selectedStudent.status === 'active' ? 'Active' : 'Inactive'}
-                  variant="outlined"
-                  InputProps={{ readOnly: true }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                      backgroundColor: selectedStudent.status === 'active' ? '#d1fae5' : '#fee2e2',
-                      '& input': {
-                        color: selectedStudent.status === 'active' ? '#065f46' : '#991b1b',
-                        fontWeight: 600,
-                      },
-                    },
-                  }}
-                />
-              )}
+                  },
+                }}
+              />
 
               {/* Joined Date - Always Read-only */}
               <TextField
                 fullWidth
                 size="small"
                 label="Joined Date"
-                value={selectedStudent.joined}
+                value={selectedStudent.joined || 'N/A'}
                 variant="outlined"
                 InputProps={{ readOnly: true }}
                 sx={{
@@ -227,8 +363,8 @@ const StudentDetailModal = ({
                 size="small"
                 label="Full Name"
                 name="name"
-                value={isEditMode ? editFormData.name : selectedStudent.name}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.name : selectedStudent.fullname || 'N/A'}
+                onChange={handleInputChange}
                 variant="outlined"
                 InputProps={{ readOnly: !isEditMode }}
                 sx={{
@@ -253,8 +389,8 @@ const StudentDetailModal = ({
                 label="Date of Birth"
                 name="dob"
                 type="date"
-                value={isEditMode ? editFormData.dob : selectedStudent.dob}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.dob : selectedStudent.dateOfBirth || ''}
+                onChange={handleInputChange}
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ readOnly: !isEditMode }}
@@ -282,7 +418,7 @@ const StudentDetailModal = ({
                   label="Gender"
                   name="gender"
                   value={editFormData.gender}
-                  onChange={onInputChange}
+                  onChange={handleInputChange}
                   variant="outlined"
                   sx={{
                     '& .MuiOutlinedInput-root': {
@@ -305,7 +441,7 @@ const StudentDetailModal = ({
                   fullWidth
                   size="small"
                   label="Gender"
-                  value={selectedStudent.gender}
+                  value={selectedStudent.genderDisplay || 'N/A'}
                   variant="outlined"
                   InputProps={{ readOnly: true }}
                   sx={{
@@ -317,6 +453,31 @@ const StudentDetailModal = ({
                 />
               )}
 
+              {/* Class Level */}
+              <TextField
+                fullWidth
+                size="small"
+                label="Class Level"
+                name="classLevel"
+                value={isEditMode ? editFormData.classLevel : selectedStudent.classLevel || '-'}
+                onChange={handleInputChange}
+                variant="outlined"
+                InputProps={{ readOnly: !isEditMode }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    backgroundColor: !isEditMode ? '#f9fafb' : 'transparent',
+                    '&:hover fieldset': {
+                      borderColor: isEditMode ? '#10b981' : '#e5e7eb',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#10b981',
+                      borderWidth: '2px',
+                    },
+                  },
+                }}
+              />
+
               {/* Address - Full Width */}
               <div className="md:col-span-2">
                 <TextField
@@ -324,8 +485,8 @@ const StudentDetailModal = ({
                   size="small"
                   label="Address"
                   name="address"
-                  value={isEditMode ? editFormData.address : selectedStudent.address}
-                  onChange={onInputChange}
+                  value={isEditMode ? editFormData.address : selectedStudent.address || 'N/A'}
+                  onChange={handleInputChange}
                   variant="outlined"
                   multiline
                   rows={3}
@@ -361,8 +522,8 @@ const StudentDetailModal = ({
                 size="small"
                 label="Parent Name"
                 name="parentName"
-                value={isEditMode ? editFormData.parentName : selectedStudent.parentName}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.parentName : selectedStudent.parent?.parentName || 'N/A'}
+                onChange={handleInputChange}
                 variant="outlined"
                 InputProps={{ readOnly: !isEditMode }}
                 sx={{
@@ -387,8 +548,8 @@ const StudentDetailModal = ({
                 label="Parent Phone"
                 name="parentPhone"
                 type="tel"
-                value={isEditMode ? editFormData.parentPhone : selectedStudent.parentPhone}
-                onChange={onInputChange}
+                value={isEditMode ? editFormData.parentPhone : selectedStudent.parent?.parentPhone || 'N/A'}
+                onChange={handleInputChange}
                 variant="outlined"
                 InputProps={{ readOnly: !isEditMode }}
                 sx={{
@@ -416,50 +577,36 @@ const StudentDetailModal = ({
             </div>
             <div className="grid md:grid-cols-2 gap-4">
               {/* Program */}
-              {isEditMode ? (
-                <TextField
-                  select
-                  fullWidth
-                  size="small"
-                  label="Program"
-                  name="program"
-                  value={editFormData.program}
-                  onChange={onInputChange}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                      '&:hover fieldset': {
-                        borderColor: '#10b981',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#10b981',
-                        borderWidth: '2px',
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value="Paket Reguler SMA">Paket Reguler SMA</MenuItem>
-                  <MenuItem value="Paket Intensif SMA">Paket Intensif SMA</MenuItem>
-                  <MenuItem value="Paket UTBK">Paket UTBK</MenuItem>
-                  <MenuItem value="Paket Private">Paket Private</MenuItem>
-                </TextField>
-              ) : (
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Program"
-                  value={selectedStudent.program}
-                  variant="outlined"
-                  InputProps={{ readOnly: true }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: '8px',
-                      backgroundColor: '#f9fafb',
-                    },
-                  }}
-                />
-              )}
+              <TextField
+                fullWidth
+                size="small"
+                label="Active Program"
+                value={selectedStudent.activeProgram || 'No Active Program'}
+                variant="outlined"
+                InputProps={{ readOnly: true }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    backgroundColor: '#f9fafb',
+                  },
+                }}
+              />
+
+              {/* Enrollment History Count */}
+              <TextField
+                fullWidth
+                size="small"
+                label="Total Enrollments"
+                value={selectedStudent.enrollments?.length || 0}
+                variant="outlined"
+                InputProps={{ readOnly: true }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    backgroundColor: '#f9fafb',
+                  },
+                }}
+              />
             </div>
           </div>
         </div>
