@@ -196,6 +196,7 @@ const Overview = ({
             <DataTable
               title=""
               searchPlaceholder="Search by student name..."
+              accentColor="#10b981"
               searchQuery={searchIncome}
               onSearchChange={(e) => setSearchIncome(e.target.value)}
               filterComponents={

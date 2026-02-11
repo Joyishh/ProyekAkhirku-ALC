@@ -697,6 +697,7 @@ const Overview = ({ onClassClick }) => {
         title="Class List"
         subtitle="Click on a View Details button to see more details"
         searchPlaceholder="Search class name or teacher..."
+        accentColor="#9333ea"
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         filterComponents={
@@ -711,11 +712,17 @@ const Overview = ({ onClassClick }) => {
                 minWidth: "160px",
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "8px",
-                  "&:hover fieldset": { borderColor: "#a855f7" },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#9333ea",
-                    borderWidth: "2px",
+                  backgroundColor: "#f9fafb",
+                  "&:hover fieldset": {
+                    borderColor: "#9333ea !important",
                   },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#9333ea !important",
+                    borderWidth: "2px !important",
+                  },
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#9333ea !important",
                 },
               }}
             >
@@ -784,10 +791,7 @@ const Overview = ({ onClassClick }) => {
             render: (cls) => (
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Icon
-                    icon="mdi:school"
-                    className="w-5 h-5 text-purple-600"
-                  />
+                  <Icon icon="mdi:school" className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
                   <div className="text-sm font-medium text-gray-900">
@@ -838,10 +842,7 @@ const Overview = ({ onClassClick }) => {
             align: "center",
             render: (cls) => (
               <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                <Icon
-                  icon="mdi:account-group"
-                  className="w-3.5 h-3.5 mr-1"
-                />
+                <Icon icon="mdi:account-group" className="w-3.5 h-3.5 mr-1" />
                 {cls.totalStudents}
               </span>
             ),
@@ -852,7 +853,7 @@ const Overview = ({ onClassClick }) => {
             render: (cls) => (
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getAttendanceRateColor(
-                  cls.attendanceRate
+                  cls.attendanceRate,
                 )}`}
               >
                 {cls.attendanceRate}%
@@ -875,7 +876,7 @@ const Overview = ({ onClassClick }) => {
         ]}
         data={filteredClasses.slice(
           page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage
+          page * rowsPerPage + rowsPerPage,
         )}
         pagination={{
           count: filteredClasses.length,

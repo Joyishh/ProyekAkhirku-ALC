@@ -27,6 +27,7 @@ const ClassesTable = ({
       title="Class List"
       subtitle="Click on a View Details button to see more details"
       searchPlaceholder="Search class name or teacher..."
+      accentColor="#4f46e5"
       searchQuery={searchQuery}
       onSearchChange={(e) => setSearchQuery(e.target.value)}
       filterComponents={

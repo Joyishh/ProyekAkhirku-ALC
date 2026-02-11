@@ -1,20 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Icon } from '@iconify/react';
-import { TextField, MenuItem, CircularProgress } from '@mui/material';
-import ModuleHeader from '../../../../../../../components/ModuleHeader';
-import DataTable from '../../../../../../../components/DataTable';
-import studentService from '../../../../../../../services/studentService';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { Icon } from "@iconify/react";
+import { TextField, MenuItem, CircularProgress } from "@mui/material";
+import ModuleHeader from "../../../../../../../components/ModuleHeader";
+import DataTable from "../../../../../../../components/DataTable";
+import studentService from "../../../../../../../services/studentService";
+import { toast } from "react-toastify";
 
-const StudentList = ({ 
-  onViewDetails,
-  refreshTrigger
-}) => {
+const StudentList = ({ onViewDetails, refreshTrigger }) => {
   // State management
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterProgram, setFilterProgram] = useState('All Programs');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterProgram, setFilterProgram] = useState("All Programs");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -24,13 +21,13 @@ const StudentList = ({
       try {
         setLoading(true);
         const response = await studentService.getAllStudents();
-        
+
         if (response.success && response.data) {
           setStudents(response.data);
         }
       } catch (error) {
-        console.error('Failed to fetch students:', error);
-        toast.error('Gagal memuat data siswa');
+        console.error("Failed to fetch students:", error);
+        toast.error("Gagal memuat data siswa");
       } finally {
         setLoading(false);
       }
@@ -50,29 +47,30 @@ const StudentList = ({
   };
 
   // Filter students based on search and program filter
-  const filteredStudents = students.filter(student => {
-    const matchesSearch = 
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
       student.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.studentId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.program?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.email?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesProgram = filterProgram === 'All Programs' || student.program === filterProgram;
-    
+
+    const matchesProgram =
+      filterProgram === "All Programs" || student.program === filterProgram;
+
     return matchesSearch && matchesProgram;
   });
 
   // Get paginated students
   const paginatedStudents = filteredStudents.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   // Loading state
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <CircularProgress size={40} sx={{ color: '#10b981' }} />
+        <CircularProgress size={40} sx={{ color: "#10b981" }} />
         <span className="ml-3 text-gray-600">Loading students data...</span>
       </div>
     );
@@ -95,25 +93,29 @@ const StudentList = ({
         searchPlaceholder="Search students by name, ID, or program..."
         searchQuery={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
+        accentColor="#10b981"
         filterComponents={
           <TextField
             select
             size="small"
             value={filterProgram}
             onChange={(e) => setFilterProgram(e.target.value)}
-            sx={{ 
-              '& .MuiOutlinedInput-root': { 
-                borderRadius: '8px',
-                backgroundColor: '#f9fafb',
-                '&:hover fieldset': {
-                  borderColor: '#10b981',
+            sx={{
+              minWidth: "200px",
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+                backgroundColor: "#f9fafb",
+                "&:hover fieldset": {
+                  borderColor: "#10b981 !important",
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#10b981',
-                  borderWidth: '2px',
+                "&.Mui-focused fieldset": {
+                  borderColor: "#10b981 !important",
+                  borderWidth: "2px !important",
                 },
-              }, 
-              minWidth: '200px' 
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#10b981 !important",
+              },
             }}
           >
             <MenuItem value="All Programs">All Programs</MenuItem>
@@ -136,9 +138,15 @@ const StudentList = ({
             render: (student) => (
               <div className="flex items-center">
                 <div>
-                  <div className="text-sm font-medium text-gray-900">{student.name || 'N/A'}</div>
-                  <div className="text-sm text-gray-500">{student.email || 'N/A'}</div>
-                  <div className="text-xs text-gray-400">{student.studentId || 'N/A'}</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    {student.name || "N/A"}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {student.email || "N/A"}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {student.studentId || "N/A"}
+                  </div>
                 </div>
               </div>
             ),
@@ -148,7 +156,7 @@ const StudentList = ({
             align: "center",
             render: (student) => (
               <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                {student.program || 'No Program'}
+                {student.program || "No Program"}
               </span>
             ),
           },
@@ -157,7 +165,7 @@ const StudentList = ({
             align: "center",
             render: (student) => (
               <span className="text-sm text-gray-600">
-                {student.classLevel || '-'}
+                {student.classLevel || "-"}
               </span>
             ),
           },
@@ -165,12 +173,14 @@ const StudentList = ({
             header: "Status",
             align: "center",
             render: (student) => (
-              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                student.status === 'active' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {student.status || 'inactive'}
+              <span
+                className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                  student.status === "active"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-red-100 text-red-800"
+                }`}
+              >
+                {student.status || "inactive"}
               </span>
             ),
           },
@@ -178,14 +188,16 @@ const StudentList = ({
             header: "Joined",
             align: "center",
             render: (student) => (
-              <span className="text-sm text-gray-500">{student.joined || 'N/A'}</span>
+              <span className="text-sm text-gray-500">
+                {student.joined || "N/A"}
+              </span>
             ),
           },
           {
             header: "Actions",
             align: "center",
             render: (student) => (
-              <button 
+              <button
                 onClick={() => onViewDetails(student.id)}
                 className="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition-all cursor-pointer"
               >

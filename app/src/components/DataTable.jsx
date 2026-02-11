@@ -13,7 +13,8 @@ const DataTable = ({
   headerActionComponent, // Action di sebelah kanan title/subtitle
   columns, // Konfigurasi Kolom
   data,
-  pagination, // Object { page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, count }
+  pagination,
+  accentColor="#155DFC"  // Object { page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, count }
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -54,10 +55,10 @@ const DataTable = ({
                     borderRadius: "8px",
                     backgroundColor: "#f9fafb",
                     "&:hover fieldset": {
-                      borderColor: "#10b981",
+                      borderColor: accentColor,
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#10b981",
+                      borderColor: accentColor,
                       borderWidth: "2px",
                     },
                   },
