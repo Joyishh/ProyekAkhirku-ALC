@@ -27,4 +27,13 @@ const Subject = db.define("subjects", {
     underscored: true,        
   });
 
+Subject.associate = (models) => {
+    if (models.ClassSchedule) {
+        Subject.hasMany(models.ClassSchedule, {
+            foreignKey: 'subject_id',
+            as: 'schedules'
+        });
+    }
+};
+
 export default Subject

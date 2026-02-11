@@ -44,4 +44,27 @@ const Users = db.define("users", {
     underscored: true
 });
 
+Users.associate = (models) => {
+    Users.hasOne(models.Student, {
+        foreignKey: 'userId',
+        as: 'studentProfile'
+    });
+
+    Users.hasMany(models.Registration, {
+        foreignKey: 'userId',
+        as: 'registrations'
+    });
+
+    Users.hasMany(models.ClassSchedule, {
+        foreignKey: 'teacherId',
+        as: 'teachingSchedules'
+    });
+
+    // Add this new association for teachers
+    Users.hasOne(models.Teacher, {
+        foreignKey: 'userId',
+        as: 'teacherProfile'
+    });
+};
+
 export default Users;
