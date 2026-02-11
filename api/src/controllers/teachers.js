@@ -14,7 +14,7 @@ export const getAllTeachers = async (req, res) => {
                 {
                     model: Users,
                     as: 'user',
-                    attributes: ['userId', 'username', 'email', 'roleId', 'avatar']
+                    attributes: ['user_id', 'username', 'email', 'role_id']
                 }
             ],
             order: [['fullname', 'ASC']]
@@ -138,12 +138,12 @@ export const createTeacher = async (req, res) => {
             username: username,
             email: email,
             password: hashedPassword,
-            roleId: 2 // Teacher role
+            role_id: 2 // Teacher role
         }, { transaction: t });
 
         // 9. Create Teacher profile
         const newTeacher = await Teacher.create({
-            userId: newUser.userId,
+            userId: newUser.user_id,
             fullname: fullname,
             phone: phone || null,
             specialization: specialization || null
@@ -158,7 +158,7 @@ export const createTeacher = async (req, res) => {
                 {
                     model: Users,
                     as: 'user',
-                    attributes: ['userId', 'username', 'email', 'roleId']
+                    attributes: ['user_id', 'username', 'email', 'role_id']
                 }
             ]
         });
@@ -218,7 +218,7 @@ export const getTeacherById = async (req, res) => {
                 {
                     model: Users,
                     as: 'user',
-                    attributes: ['userId', 'username', 'email', 'roleId', 'avatar', 'createdAt']
+                    attributes: ['user_id', 'username', 'email', 'role_id', 'created_at']
                 }
             ]
         });
@@ -238,11 +238,10 @@ export const getTeacherById = async (req, res) => {
             phone: teacher.phone,
             specialization: teacher.specialization,
             user: {
-                userId: teacher.user?.userId,
+                userId: teacher.user?.user_id,
                 username: teacher.user?.username,
                 email: teacher.user?.email,
-                avatar: teacher.user?.avatar,
-                joinedDate: teacher.user?.createdAt
+                joinedDate: teacher.user?.created_at
             },
             createdAt: teacher.createdAt,
             updatedAt: teacher.updatedAt

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './pages/landing/LandingPage.jsx'
 import AdminDashboard from './pages/dashboard/admin/AdminDashboard.jsx'
 import AdminDashboardModule from './pages/dashboard/admin/modules/Dashboard/AdminDashboardModule.jsx'
+import TeachersModule from './pages/dashboard/admin/modules/Teachers/TeachersModule.jsx'
 import StudentsModule from './pages/dashboard/admin/modules/Students/StudentsModule.jsx'
 import RegistrationModule from './pages/dashboard/admin/modules/Students/Registration/RegistrationModule.jsx'
 import DataManagementModule from './pages/dashboard/admin/modules/Students/DataManagement/DataManagementModule.jsx'
@@ -30,6 +31,9 @@ function App() {
       {/* Admin Dashboard with Nested Routes */}
       <Route path="/dashboard/admin" element={<AdminDashboard />}>
         <Route index element={<AdminDashboardModule />} />
+        
+        {/* Teachers Module */}
+        <Route path="teachers" element={<TeachersModule />} />
         
         {/* Students Module with Nested Sub-Routes */}
         <Route path="students" element={<StudentsModule />}>

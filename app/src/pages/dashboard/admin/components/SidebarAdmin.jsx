@@ -27,6 +27,13 @@ const SidebarAdmin = () => {
       path: '/dashboard/admin'
     },
     {
+      id: 'teachers',
+      label: 'Teachers',
+      icon: 'mdi:account-school',
+      type: 'single',
+      path: '/dashboard/admin/teachers'
+    },
+    {
       id: 'students',
       label: 'Students',
       icon: 'mdi:account-group',

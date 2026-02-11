@@ -45,7 +45,7 @@ const Teacher = db.define('Teacher', {
 Teacher.associate = (models) => {
     // Teacher belongs to User
     Teacher.belongsTo(models.User, {
-        foreignKey: 'userId',
+        foreignKey: 'user_id',
         as: 'user'
     });
 };

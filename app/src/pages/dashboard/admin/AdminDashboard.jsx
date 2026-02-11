@@ -13,6 +13,7 @@ const AdminDashboard = () => {
     }
     
     const moduleNames = {
+      '/dashboard/admin/teachers': 'Teachers Management',
       '/dashboard/admin/students': 'Students Management',
       '/dashboard/admin/classes': 'Classes Management',
       '/dashboard/admin/finance': 'Finance Management',
