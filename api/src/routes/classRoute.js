@@ -3,7 +3,8 @@ import {
     getAllClasses, 
     createClass, 
     getClassById, 
-    addStudentsToClass 
+    addStudentsToClass,
+    deleteClass
 } from '../controllers/class.js';
 import { authenticateToken } from '../middlewares/authToken.js';
 import { authUserRole } from '../middlewares/authUserRole.js';
@@ -21,5 +22,6 @@ router.get('/:id', authenticateToken, authUserRole([1, 2]), getClassById);
 
 // Add students to class (Admin only)
 router.post('/:id/members', authenticateToken, authUserRole([1]), addStudentsToClass);
+router.delete('/:id', authenticateToken, authUserRole([1]), deleteClass);
 
 export default router;

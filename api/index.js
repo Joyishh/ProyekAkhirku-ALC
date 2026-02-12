@@ -14,6 +14,7 @@ import dashboardRoute from "./src/routes/dashboardRoute.js";
 import studentRoute from "./src/routes/studentRoute.js";
 import classRoute from "./src/routes/classRoute.js";
 import teacherRoute from "./src/routes/teacherRoute.js";
+import classScheduleRoute from "./src/routes/classScheduleRoute.js";
 
 import Package from "./src/models/packageModel.js";
 import PackageItem from "./src/models/packageItemModel.js";
@@ -58,6 +59,7 @@ app.use("/dashboard", dashboardRoute);
 app.use("/students", studentRoute);
 app.use("/classes", classRoute);
 app.use("/teachers", teacherRoute);
+app.use("/class-schedules", classScheduleRoute);
 // Inisialisasi asosiasi antar model
 
 const models = {

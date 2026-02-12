@@ -48,6 +48,12 @@ Teacher.associate = (models) => {
         foreignKey: 'user_id',
         as: 'user'
     });
+    if (models.ClassSchedule) {
+        Teacher.hasMany(models.ClassSchedule, {
+            foreignKey: 'teacherId',
+            as: 'schedules'
+        });
+    }
 };
 
 export default Teacher;

@@ -33,8 +33,8 @@ const ClassSchedule = db.define('ClassSchedule', {
         allowNull: false,
         field: 'teacher_id',
         references: {
-            model: 'users',
-            key: 'user_id'
+            model: 'teachers',
+            key: 'teacher_id'
         }
     },
     dayOfWeek: {
@@ -81,7 +81,7 @@ ClassSchedule.associate = (models) => {
     });
 
     // ClassSchedule belongs to User (Teacher)
-    ClassSchedule.belongsTo(models.User, {
+    ClassSchedule.belongsTo(models.Teacher, {
         foreignKey: 'teacherId',
         as: 'teacher'
     });
