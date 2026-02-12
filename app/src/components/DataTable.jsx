@@ -133,23 +133,25 @@ const DataTable = ({
       </div>
 
       {/* --- PAGINATION SECTION --- */}
-      <TablePagination
-        component="div"
-        count={pagination.count}
-        page={pagination.page}
-        onPageChange={pagination.handleChangePage}
-        rowsPerPage={pagination.rowsPerPage}
-        onRowsPerPageChange={pagination.handleChangeRowsPerPage}
-        rowsPerPageOptions={[10, 25, 50]}
-        sx={{
-          borderTop: "1px solid #e5e7eb",
-          ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-            {
-              marginTop: "14px",
-              marginBottom: "14px",
-            },
-        }}
-      />
+      {pagination && (
+        <TablePagination
+          component="div"
+          count={pagination.count}
+          page={pagination.page}
+          onPageChange={pagination.handleChangePage}
+          rowsPerPage={pagination.rowsPerPage}
+          onRowsPerPageChange={pagination.handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 25, 50]}
+          sx={{
+            borderTop: "1px solid #e5e7eb",
+            ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
+              {
+                marginTop: "14px",
+                marginBottom: "14px",
+              },
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -47,13 +47,30 @@ const SidebarAdmin = () => {
       ]
     },
     {
-      id: 'classes',
-      label: 'Classes',
-      icon: 'mdi:school',
+      id: 'academic',
+      label: 'Academic', // Nama baru: Akademik
+      icon: 'mdi:school-outline', // Ikon payung akademik
       type: 'dropdown',
-      path: '/dashboard/admin/classes',
+      path: '/dashboard/admin/academic',
       children: [
-        { id: 'schedule', label: 'Schedule', icon: 'mdi:calendar-clock', path: '/dashboard/admin/classes/schedule' }
+        { 
+          id: 'classes-manage', 
+          label: 'Manage Classes', 
+          icon: 'mdi:google-classroom', 
+          path: '/dashboard/admin/academic/classes' // Path baru untuk Manajemen Kelas (Wadah)
+        },
+        { 
+          id: 'schedule', 
+          label: 'Schedule', 
+          icon: 'mdi:calendar-clock', 
+          path: '/dashboard/admin/academic/schedules' // Path baru untuk Jadwal
+        },
+        { 
+          id: 'curriculum', 
+          label: 'Curriculum', 
+          icon: 'mdi:book-open-page-variant-outline', 
+          path: '/dashboard/admin/academic/curriculum' // Path baru untuk Paket/Mapel
+        }
       ]
     },
     {

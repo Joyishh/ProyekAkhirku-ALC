@@ -1,12 +1,12 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 
-const ClassesModule = () => {
+const AcademicModule = () => {
   return (
-    <div className="classes-module">
+    <div className="academic-module">
       <Outlet />
     </div>
   );
 };
 
-export default ClassesModule;
+export default AcademicModule;

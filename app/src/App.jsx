@@ -9,10 +9,12 @@ import RegistrationModule from './pages/dashboard/admin/modules/Students/Registr
 import DataManagementModule from './pages/dashboard/admin/modules/Students/DataManagement/DataManagementModule.jsx'
 import AttendanceModule from './pages/dashboard/admin/modules/Students/Attendance/AttendanceModule.jsx'
 import LearningProgressModule from './pages/dashboard/admin/modules/Students/LearningProgress/LearningProgressModule.jsx'
-import ClassesModule from './pages/dashboard/admin/modules/Classes/ClassesModule.jsx'
-import ScheduleModule from './pages/dashboard/admin/modules/Classes/Schedule/ScheduleModule.jsx'
 import FinanceModule from './pages/dashboard/admin/modules/Finance/FinanceModule.jsx'
 import AnnouncementsModule from './pages/dashboard/admin/modules/Announcements/AnnouncementsModule.jsx'
+import AcademicModule from './pages/dashboard/admin/modules/Academic/AcademicModule.jsx';
+import ClassesModule from './pages/dashboard/admin/modules/Academic/Classes/ClassesModule.jsx';
+import SchedulesModule from './pages/dashboard/admin/modules/Academic/Schedules/SchedulesModule.jsx';
+import CurriculumModule from './pages/dashboard/admin/modules/Academic/Curriculum/CurriculumModule.jsx';
 import StudentDashboard from './pages/dashboard/student/StudentDashboard.jsx'
 import TeacherDashboard from './pages/dashboard/teacher/TeacherDashboard.jsx'
 import TeacherDashboardModule from './pages/dashboard/teacher/modules/Dashboard/TeacherDashboardModule.jsx'
@@ -44,10 +46,12 @@ function App() {
           <Route path="learning-progress" element={<LearningProgressModule />} />
         </Route>
         
-        {/* Classes Module with Nested Sub-Routes */}
-        <Route path="classes" element={<ClassesModule />}>
-          <Route index element={<Navigate to="schedule" replace />} />
-          <Route path="schedule" element={<ScheduleModule />} />
+        {/* Academic Module with Nested Sub-Routes */}
+        <Route path="academic" element={<AcademicModule />}>
+          <Route index element={<Navigate to="classes" replace />} />
+          <Route path="classes" element={<ClassesModule />} />
+          <Route path="schedules" element={<SchedulesModule />} />
+          <Route path="curriculum" element={<CurriculumModule />} />
         </Route>
         
         <Route path="finance" element={<FinanceModule />} />

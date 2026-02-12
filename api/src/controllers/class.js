@@ -4,6 +4,7 @@ import Package from "../models/packageModel.js";
 import ClassMember from "../models/classMemberModel.js";
 import ClassSchedule from "../models/classScheduleModel.js";
 import Student from "../models/studentModel.js";
+import { Op } from "sequelize";
 
 /**
  * Get All Classes
@@ -199,6 +200,69 @@ export const getClassById = async (req, res) => {
 };
 
 /**
+ * Get Available Students for Class
+ * Menampilkan daftar siswa yang punya paket sesuai TAPI belum masuk kelas ini
+ */
+export const getAvailableStudents = async (req, res) => {
+  try {
+    const { id } = req.params; // Class ID
+
+    // 1. Cek Kelas & Paketnya
+    const classData = await Class.findByPk(id);
+    if (!classData) {
+      return res.status(404).json({ success: false, message: "Kelas tidak ditemukan" });
+    }
+
+    // 2. Ambil ID siswa yang SUDAH ada di kelas ini (untuk di-exclude)
+    const existingMembers = await ClassMember.findAll({
+      where: { classId: id },
+      attributes: ['studentId']
+    });
+    const existingStudentIds = existingMembers.map(m => m.studentId);
+
+    // 3. Cari Siswa yang:
+    // - Punya Enrollment AKTIF untuk packageId kelas ini
+    // - TIDAK ada di dalam existingStudentIds
+    const candidates = await StudentEnrollment.findAll({
+      where: {
+        packageId: classData.packageId,
+        status: 'active',
+        studentId: { [Op.notIn]: existingStudentIds } // Exclude yang sudah masuk
+      },
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['studentId', 'fullname', 'classLevel', 'gender']
+        }
+      ]
+    });
+
+    // Format data untuk dropdown/tabel selection
+    const formattedCandidates = candidates.map(c => ({
+      enrollmentId: c.enrollmentId,
+      studentId: c.student.studentId,
+      fullname: c.student.fullname,
+      classLevel: c.student.classLevel,
+      gender: c.student.gender
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedCandidates
+    });
+
+  } catch (error) {
+    console.error("Get candidates error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengambil data kandidat siswa",
+      error: error.message
+    });
+  }
+};
+
+/**
  * Add Students to Class
  * Bulk add multiple students to a class as members
  */
@@ -230,6 +294,30 @@ export const addStudentsToClass = async (req, res) => {
         success: false,
         message: "Kelas tidak ditemukan",
       });
+    }
+
+    // Verify all students have active enrollment for the class's package
+    const validEnrollments = await StudentEnrollment.findAll({
+        where: {
+            studentId: student_ids,
+            packageId: classExists.packageId,
+            status: 'active'
+        },
+        attributes: ['studentId', 'enrollmentId'],
+        transaction: t
+    });
+
+    // Verify if all students passed the enrollment check
+    if (validEnrollments.length !== student_ids.length) {
+        await t.rollback();
+        const validStudentIds = validEnrollments.map(e => e.studentId);
+        const invalidStudents = student_ids.filter(id => !validStudentIds.includes(id));
+        
+        return res.status(400).json({
+            success: false,
+            message: "Beberapa siswa tidak memiliki Paket Aktif yang sesuai untuk kelas ini.",
+            invalidStudentIds: invalidStudents
+        });
     }
 
     // Check current enrollment
@@ -281,10 +369,10 @@ export const addStudentsToClass = async (req, res) => {
     }
 
     // Bulk create class members
-    const membersData = student_ids.map((studentId) => ({
+    const membersData = validEnrollments.map((enrollmentData) => ({
       classId: id,
-      studentId: studentId,
-      enrollmentId: null, // Can be set later if needed
+      studentId: enrollmentData.studentId,
+      enrollmentId: enrollmentData.enrollmentId,
     }));
 
     const newMembers = await ClassMember.bulkCreate(membersData, {
