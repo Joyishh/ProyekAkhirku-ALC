@@ -87,7 +87,7 @@ export const createClass = async (req, res) => {
       packageId: package_id,
       className: class_name,
       capacity: capacity || 30,
-      status: "active",
+      isActive: "active",
     });
 
     // Fetch the created class with package info
@@ -166,7 +166,7 @@ export const getClassById = async (req, res) => {
       classId: classData.classId,
       className: classData.className,
       capacity: classData.capacity,
-      status: classData.status,
+      isActive: classData.isActive,
       package: {
         packageId: classData.package?.packageId,
         packageName: classData.package?.packageName,
@@ -226,7 +226,7 @@ export const getAvailableStudents = async (req, res) => {
     const candidates = await StudentEnrollment.findAll({
       where: {
         packageId: classData.packageId,
-        status: 'active',
+        isActive: 'active',
         studentId: { [Op.notIn]: existingStudentIds } // Exclude yang sudah masuk
       },
       include: [
@@ -301,7 +301,7 @@ export const addStudentsToClass = async (req, res) => {
         where: {
             studentId: student_ids,
             packageId: classExists.packageId,
-            status: 'active'
+            isActive: 'active'
         },
         attributes: ['studentId', 'enrollmentId'],
         transaction: t

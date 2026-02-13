@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
 import api from '../../../../../../../utils/api';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import DataTable from '../../../../../../../components/DataTable';
@@ -32,7 +33,7 @@ const Overview = () => {
       setPackages(response.data.data || []);
     } catch (error) {
       console.error('Error fetching packages:', error);
-      alert('Gagal memuat data paket');
+      toast.error('Gagal memuat data paket');
     } finally {
       setLoading(false);
     }
@@ -45,7 +46,7 @@ const Overview = () => {
       setSubjects(response.data.data || []);
     } catch (error) {
       console.error('Error fetching subjects:', error);
-      alert('Gagal memuat data mata pelajaran');
+      toast.error('Gagal memuat data mata pelajaran');
     } finally {
       setLoading(false);
     }
@@ -55,40 +56,74 @@ const Overview = () => {
     setExpandedPackageId(expandedPackageId === packageId ? null : packageId);
   };
 
-  // Define columns for Subjects DataTable
+  // Helper function to format price to IDR (only formatting, no data guessing)
+  const formatPrice = (price) => {
+    if (!price || price === 0) return '-';
+    return `Rp ${parseInt(price).toLocaleString('id-ID')}`;
+  };
+
+  // Define columns for Subjects DataTable (using standardized field names)
   const subjectColumns = [
     {
-      header: 'Subject ID',
-      accessor: 'subject_id',
-      align: 'left',
+      header: 'ID',
+      accessor: 'subjectId',
+      align: 'center',
+      render: (subject) => (
+        <span className="text-sm text-gray-600">#{subject.subjectId || subject.subject_id}</span>
+      ),
     },
     {
       header: 'Subject Name',
-      accessor: 'subject_name',
+      accessor: 'subjectName',
       align: 'left',
+      render: (subject) => (
+        <div className="flex items-center">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+            <Icon icon="mdi:book-open-variant" className="w-4 h-4 text-purple-600" />
+          </div>
+          <span className="text-sm font-medium text-gray-900">
+            {subject.subjectName || subject.subject_name}
+          </span>
+        </div>
+      ),
     },
     {
       header: 'Description',
       accessor: 'description',
       align: 'left',
-      render: (subject) => subject.description || '-',
+      render: (subject) => (
+        <span className="text-sm text-gray-600">{subject.description || '-'}</span>
+      ),
     },
     {
       header: 'Created At',
-      accessor: 'created_at',
+      accessor: 'createdAt',
       align: 'center',
-      render: (subject) => subject.created_at ? new Date(subject.created_at).toLocaleDateString() : '-',
+      render: (subject) => {
+        const date = subject.createdAt || subject.created_at;
+        return (
+          <span className="text-sm text-gray-600">
+            {date ? new Date(date).toLocaleDateString('id-ID') : '-'}
+          </span>
+        );
+      },
     },
     {
-      header: 'Action',
+      header: 'Actions',
       accessor: 'action',
       align: 'center',
       render: (subject) => (
         <div className="flex items-center justify-center space-x-2">
-          <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+          <button 
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+            title="Edit Subject"
+          >
             <Icon icon="mdi:pencil" className="w-4 h-4" />
           </button>
-          <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
+          <button 
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            title="Delete Subject"
+          >
             <Icon icon="mdi:delete" className="w-4 h-4" />
           </button>
         </div>
@@ -102,8 +137,8 @@ const Overview = () => {
       <ModuleHeader
         icon="mdi:book-education"
         iconColor="purple"
-        title="Manajemen Kurikulum"
-        description="Atur Paket Belajar dan Master Mata Pelajaran"
+        title="Curriculum Management"
+        description="Manage learning packages and subjects"
       >
         {activeTab === 'packages' ? (
           <button
@@ -111,7 +146,7 @@ const Overview = () => {
             className="flex items-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-all cursor-pointer"
           >
             <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
-            Tambah Paket
+            Add Package
           </button>
         ) : (
           <button
@@ -119,7 +154,7 @@ const Overview = () => {
             className="flex items-center px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-all cursor-pointer"
           >
             <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
-            Tambah Mapel
+            Add Subject
           </button>
         )}
       </ModuleHeader>
@@ -166,11 +201,20 @@ const Overview = () => {
             </div>
           ) : activeTab === 'packages' ? (
             /* Packages Accordion Table */
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="space-y-4">
+              {/* Table Header - Similar to DataTable */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800">Paket Belajar</h2>
+                  <p className="text-sm text-gray-600">Total {packages.length} paket</p>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10"></th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Package Name
                     </th>
@@ -184,37 +228,28 @@ const Overview = () => {
                       Status
                     </th>
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Action
+                      Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {packages.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="px-6 py-12 text-center">
+                      <td colSpan="5" className="px-6 py-12 text-center">
                         <Icon icon="mdi:package-variant" className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                         <p className="text-gray-500">Belum ada paket belajar. Klik "Tambah Paket" untuk membuat paket baru.</p>
                       </td>
                     </tr>
                   ) : (
                     packages.map((pkg) => (
-                      <React.Fragment key={pkg.package_id}>
-                        <tr className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => togglePackageExpansion(pkg.package_id)}
-                              className="p-1 hover:bg-gray-100 rounded transition-colors cursor-pointer"
-                            >
-                              {expandedPackageId === pkg.package_id ? (
-                                <Icon icon="mdi:chevron-up" className="w-5 h-5 text-gray-600" />
-                              ) : (
-                                <Icon icon="mdi:chevron-down" className="w-5 h-5 text-gray-600" />
-                              )}
-                            </button>
-                          </td>
+                      <React.Fragment key={pkg.packageId}>
+                        <tr 
+                          className="hover:bg-gray-50 transition-colors cursor-pointer"
+                          onClick={() => togglePackageExpansion(pkg.packageId)}
+                        >
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {pkg.package_name}
+                              {pkg.packageName}
                             </div>
                           </td>
                           <td className="px-6 py-4">
@@ -224,19 +259,19 @@ const Overview = () => {
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="text-sm font-semibold text-gray-900">
-                              {pkg.price ? `Rp ${pkg.price.toLocaleString()}` : '-'}
+                              {formatPrice(pkg.price)}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                              pkg.status === 'active' 
+                              pkg.isActive
                                 ? 'bg-green-100 text-green-800' 
                                 : 'bg-gray-100 text-gray-800'
                             }`}>
-                              {pkg.status || 'inactive'}
+                              {pkg.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-center space-x-2">
                               <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
                                 <Icon icon="mdi:pencil" className="w-4 h-4" />
@@ -244,36 +279,45 @@ const Overview = () => {
                               <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
                                 <Icon icon="mdi:delete" className="w-4 h-4" />
                               </button>
+                              <button 
+                                onClick={() => togglePackageExpansion(pkg.packageId)}
+                                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                              >
+                                {expandedPackageId === pkg.packageId ? (
+                                  <Icon icon="mdi:chevron-up" className="w-5 h-5" />
+                                ) : (
+                                  <Icon icon="mdi:chevron-down" className="w-5 h-5" />
+                                )}
+                              </button>
                             </div>
                           </td>
                         </tr>
                         {/* Expanded Content */}
-                        {expandedPackageId === pkg.package_id && (
+                        {expandedPackageId === pkg.packageId && (
                           <tr>
-                            <td colSpan="6" className="px-6 py-4 bg-gray-50">
+                            <td colSpan="5" className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                               <div className="ml-8">
-                                <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                                  <Icon icon="mdi:format-list-bulleted" className="w-4 h-4 mr-2" />
                                   Mata Pelajaran dalam Paket:
                                 </h4>
-                                {!pkg.package_items || pkg.package_items.length === 0 ? (
+                                {!pkg.subjects || pkg.subjects.length === 0 ? (
                                   <p className="text-sm text-gray-500 italic">
                                     Belum ada mata pelajaran dalam paket ini.
                                   </p>
                                 ) : (
-                                  <div className="space-y-2">
-                                    {pkg.package_items.map((item, index) => (
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    {pkg.subjects.map((subject, index) => (
                                       <div
                                         key={index}
-                                        className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200"
+                                        className="flex items-center bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
                                       >
-                                        <div className="flex items-center space-x-3">
-                                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                            <Icon icon="mdi:book-open-page-variant" className="w-4 h-4 text-purple-600" />
-                                          </div>
-                                          <span className="text-sm font-medium text-gray-900">
-                                            {item.subject?.subject_name || item.subject_name || 'Unknown Subject'}
-                                          </span>
+                                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                                          <Icon icon="mdi:book-open-page-variant" className="w-4 h-4 text-purple-600" />
                                         </div>
+                                        <span className="text-sm font-medium text-gray-900">
+                                          {subject.subjectName}
+                                        </span>
                                       </div>
                                     ))}
                                   </div>
@@ -287,6 +331,7 @@ const Overview = () => {
                   )}
                 </tbody>
               </table>
+            </div>
             </div>
           ) : (
             /* Subjects DataTable */

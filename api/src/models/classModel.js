@@ -30,11 +30,11 @@ const Class = db.define('Class', {
         defaultValue: 30,
         field: 'capacity'
     },
-    status: {
+    isActive: {
         type: DataTypes.STRING(20),
         allowNull: false,
         defaultValue: 'active',
-        field: 'status'
+        field: 'is_active'
     }
 }, {
     tableName: 'classes',

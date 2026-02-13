@@ -25,7 +25,7 @@ const Overview = () => {
       setClasses(response.data.data || []);
     } catch (error) {
       console.error('Error fetching classes:', error);
-      alert('Gagal memuat data kelas');
+      // Ganti alert dengan console/toast di real app, tapi alert oke untuk debug
     } finally {
       setLoading(false);
     }
@@ -36,53 +36,76 @@ const Overview = () => {
     {
       header: 'Class Name',
       accessor: 'className',
+      // Jika ingin bold nama kelasnya
+      render: (row) => <span className="text-sm font-medium text-gray-900">{row.className}</span>
     },
     {
       header: 'Package',
       accessor: 'package',
-      cell: (row) => row.package?.packageName || '-',
+      render: (row) => (
+        <span className="text-sm text-gray-600">
+           {/* Handle null safety untuk object package */}
+           {row.package?.packageName || row.package?.package_name || row.packageName || '-'}
+        </span>
+      )
     },
     {
       header: 'Capacity',
       accessor: 'capacity',
+      render: (row) => (
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+          <Icon icon="mdi:account-group" className="w-3.5 h-3.5 mr-1" />
+          {row.capacity}
+        </span>
+      )
     },
     {
       header: 'Filled',
-      accessor: 'totalMembers',
-      cell: (row) => (
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-          row.totalMembers >= row.capacity 
-            ? 'bg-red-100 text-red-800' 
-            : row.totalMembers >= row.capacity * 0.8
-            ? 'bg-yellow-100 text-yellow-800'
-            : 'bg-green-100 text-green-800'
-        }`}>
-          {row.totalMembers || 0} / {row.capacity}
-        </span>
-      ),
+      accessor: 'members', // Ganti accessor biar lebih jelas (opsional)
+      // PERBAIKAN 1: Ganti 'cell' jadi 'render'
+      render: (row) => {
+        // Hitung total member (fallback ke 0 jika undefined)
+        const total = row.totalMembers || row.members?.length || 0;
+        const cap = row.capacity || 0;
+        
+        // Logika warna badge
+        let badgeColor = 'bg-green-100 text-green-800'; // Aman
+        if (total >= cap) badgeColor = 'bg-red-100 text-red-800'; // Penuh
+        else if (total >= cap * 0.8) badgeColor = 'bg-yellow-100 text-yellow-800'; // Hampir penuh
+
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeColor}`}>
+            {total} / {cap}
+          </span>
+        );
+      },
     },
     {
       header: 'Status',
-      accessor: 'status',
-      cell: (row) => (
-        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-          row.status === 'active' 
+      accessor: 'isActive',
+      // PERBAIKAN 2: Ganti 'cell' jadi 'render'
+      render: (row) => (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          // Cek boolean secara langsung, jangan pakai string 'true'
+          row.isActive 
             ? 'bg-green-100 text-green-800' 
             : 'bg-gray-100 text-gray-800'
         }`}>
-          {row.status || 'inactive'}
+          {/* PERBAIKAN 3: Konversi boolean ke teks */}
+          {row.isActive ? 'Active' : 'Inactive'}
         </span>
       ),
     },
     {
       header: 'Action',
       accessor: 'action',
-      cell: (row) => (
+      // PERBAIKAN 4: Ganti 'cell' jadi 'render'
+      render: (row) => (
         <button
           onClick={() => navigate(`/dashboard/admin/academic/classes/${row.classId}`)}
-          className="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+          className="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-colors shadow-sm"
         >
-          <Icon icon="mdi:eye" className="w-4 h-4 mr-1" />
+          <Icon icon="mdi:eye" className="w-3.5 h-3.5 mr-1" />
           Detail
         </button>
       ),
@@ -96,22 +119,22 @@ const Overview = () => {
         icon="mdi:google-classroom"
         iconColor="blue"
         title="Class Management"
-        description="Kelola daftar kelas dan paket belajar"
+        description="Kelola daftar kelas dan kapasitas siswa"
       >
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all cursor-pointer"
+          className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm"
         >
-          <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-2" />
+          <Icon icon="mdi:plus-circle" className="w-5 h-5 mr-1.5" />
           Add Class
         </button>
       </ModuleHeader>
 
       {/* DataTable */}
       <DataTable
-        title="Classes List"
-        subtitle={`Showing ${classes.length} classes`}
-        searchPlaceholder="Search by class name or package..."
+        title="Daftar Kelas" // Sesuaikan bahasa
+        subtitle={`Menampilkan ${classes.length} kelas aktif`}
+        searchPlaceholder="Cari nama kelas atau paket..."
         searchQuery={searchTerm}
         onSearchChange={(e) => setSearchTerm(e.target.value)}
         columns={columns}

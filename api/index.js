@@ -51,7 +51,7 @@ app.listen(PORT, () => {
 //route
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
-app.use("/subject", subjectRoute);
+app.use("/subjects", subjectRoute);
 app.use("/package", packageRoute);
 app.use("/package-item", packageItemRoute);
 app.use("/registration", registrationRoute);

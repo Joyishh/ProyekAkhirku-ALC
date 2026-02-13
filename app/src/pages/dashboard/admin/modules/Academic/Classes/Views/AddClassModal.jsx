@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
 import api from '../../../../../../../utils/api';
 
 const AddClassModal = ({ isOpen, onClose, onSuccess }) => {
@@ -24,7 +25,7 @@ const AddClassModal = ({ isOpen, onClose, onSuccess }) => {
       setPackages(response.data.data || []);
     } catch (error) {
       console.error('Error fetching packages:', error);
-      alert('Gagal memuat data paket');
+      toast.error('Gagal memuat data paket');
     }
   };
 
@@ -40,19 +41,31 @@ const AddClassModal = ({ isOpen, onClose, onSuccess }) => {
     e.preventDefault();
 
     // Client-side validation
+    if (!formData.className.trim()) {
+      toast.error('Nama kelas wajib diisi');
+      return;
+    }
+
+    if (!formData.packageId) {
+      toast.error('Pilih paket terlebih dahulu');
+      return;
+    }
+
     if (formData.capacity < 1) {
-      alert('Kapasitas harus minimal 1');
+      toast.error('Kapasitas harus minimal 1');
       return;
     }
 
     setLoading(true);
 
     try {
-      await api.post('/classes', {
+      const response = await api.post('/classes', {
         package_id: parseInt(formData.packageId),
-        class_name: formData.className,
+        class_name: formData.className.trim(),
         capacity: parseInt(formData.capacity)
       });
+
+      toast.success(response.data.message || 'Kelas berhasil ditambahkan');
 
       // Reset form
       setFormData({
@@ -61,11 +74,12 @@ const AddClassModal = ({ isOpen, onClose, onSuccess }) => {
         capacity: 30
       });
 
-      onSuccess();
+      if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
+      console.error('Error creating class:', error);
       const errorMessage = error.response?.data?.message || 'Gagal menambahkan kelas';
-      alert(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -132,21 +146,27 @@ const AddClassModal = ({ isOpen, onClose, onSuccess }) => {
             <label htmlFor="packageId" className="block text-sm font-medium text-gray-700 mb-2">
               Pilih Paket <span className="text-red-500">*</span>
             </label>
-            <select
-              id="packageId"
-              name="packageId"
-              value={formData.packageId}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-            >
-              <option value="">Pilih paket</option>
-              {packages.map(pkg => (
-                <option key={pkg.packageId} value={pkg.packageId}>
-                  {pkg.packageName}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                id="packageId"
+                name="packageId"
+                value={formData.packageId}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all appearance-none bg-white cursor-pointer"
+              >
+                <option value="">Pilih paket</option>
+                {packages.map(pkg => (
+                  <option key={pkg.packageId} value={pkg.packageId}>
+                    {pkg.packageName}
+                  </option>
+                ))}
+              </select>
+              <Icon 
+                icon="mdi:chevron-down" 
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+              />
+            </div>
           </div>
 
           {/* Kapasitas */}
