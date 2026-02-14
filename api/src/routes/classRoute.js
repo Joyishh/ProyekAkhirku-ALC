@@ -5,6 +5,7 @@ import {
     getClassById, 
     updateClass,
     addStudentsToClass,
+    removeStudentFromClass,
     deleteClass,
     getAvailableStudents,
 } from '../controllers/class.js';
@@ -27,7 +28,13 @@ router.put('/:id', authenticateToken, authUserRole([1]), updateClass);
 
 // Add students to class (Admin only)
 router.post('/:id/members', authenticateToken, authUserRole([1]), addStudentsToClass);
+
+// Remove student from class (Admin only)
+router.delete('/:id/members/:memberId', authenticateToken, authUserRole([1]), removeStudentFromClass);
+
+// Delete class (Admin only)
 router.delete('/:id', authenticateToken, authUserRole([1]), deleteClass);
+
 router.get('/:id/candidates', authenticateToken, authUserRole([1]), getAvailableStudents);
 
 export default router;

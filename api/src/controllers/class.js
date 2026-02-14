@@ -573,3 +573,48 @@ export const deleteClass = async (req, res) => {
         });
     }
 };
+
+export const removeStudentFromClass = async (req, res) => {
+  try {
+    const { id, memberId } = req.params;
+
+    // Validate class exists
+    const classData = await Class.findByPk(id);
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: "Kelas tidak ditemukan"
+      });
+    }
+
+    // Find and delete the class member
+    const member = await ClassMember.findOne({
+      where: {
+        memberId: memberId,
+        classId: id
+      }
+    });
+
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: "Siswa tidak ditemukan di kelas ini"
+      });
+    }
+
+    await member.destroy();
+
+    return res.status(200).json({
+      success: true,
+      message: "Siswa berhasil dihapus dari kelas"
+    });
+
+  } catch (error) {
+    console.error("Remove student from class error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan saat menghapus siswa dari kelas",
+      error: error.message
+    });
+  }
+};
