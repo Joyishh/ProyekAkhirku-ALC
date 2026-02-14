@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import api from '../../../../../../../utils/api';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import DataTable from '../../../../../../../components/DataTable';
 import AddPackageModal from './AddPackageModal';
 import AddSubjectModal from './AddSubjectModal';
+import EditSubjectModal from './EditSubjectModal';
+import EditPackageModal from './EditPackageModal';
 
 const Overview = () => {
   // State Management
@@ -16,6 +19,10 @@ const Overview = () => {
   const [loading, setLoading] = useState(true);
   const [isAddPackageOpen, setIsAddPackageOpen] = useState(false);
   const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
+  const [isEditSubjectOpen, setIsEditSubjectOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [isEditPackageOpen, setIsEditPackageOpen] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
 
   // Fetch data based on active tab
   useEffect(() => {
@@ -60,6 +67,92 @@ const Overview = () => {
   const formatPrice = (price) => {
     if (!price || price === 0) return '-';
     return `Rp ${parseInt(price).toLocaleString('id-ID')}`;
+  };
+
+  // Handle Edit Subject
+  const handleEdit = (subject) => {
+    setSelectedSubject(subject);
+    setIsEditSubjectOpen(true);
+  };
+
+  // Handle Delete Subject
+  const handleDelete = async (subjectId) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9333ea',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (result.isConfirmed) {
+        await api.delete(`/subjects/admin/${subjectId}`);
+        
+        await Swal.fire({
+          title: 'Deleted!',
+          text: 'Subject has been deleted successfully.',
+          icon: 'success',
+          confirmButtonColor: '#9333ea'
+        });
+        
+        fetchSubjects();
+      }
+    } catch (error) {
+      console.error('Error deleting subject:', error);
+      await Swal.fire({
+        title: 'Error!',
+        text: error.response?.data?.message || 'Failed to delete subject.',
+        icon: 'error',
+        confirmButtonColor: '#9333ea'
+      });
+    }
+  };
+
+  // Handle Edit Package
+  const handleEditPackage = (pkg) => {
+    setSelectedPackage(pkg);
+    setIsEditPackageOpen(true);
+  };
+
+  // Handle Delete Package
+  const handleDeletePackage = async (packageId) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Yakin hapus paket ini?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#9333ea',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        await api.delete(`/package/admin/${packageId}`);
+        
+        await Swal.fire({
+          title: 'Berhasil!',
+          text: 'Paket berhasil dihapus.',
+          icon: 'success',
+          confirmButtonColor: '#9333ea'
+        });
+        
+        fetchPackages();
+      }
+    } catch (error) {
+      console.error('Error deleting package:', error);
+      await Swal.fire({
+        title: 'Error!',
+        text: error.response?.data?.message || 'Gagal menghapus paket.',
+        icon: 'error',
+        confirmButtonColor: '#9333ea'
+      });
+    }
   };
 
   // Define columns for Subjects DataTable (using standardized field names)
@@ -115,12 +208,14 @@ const Overview = () => {
       render: (subject) => (
         <div className="flex items-center justify-center space-x-2">
           <button 
+            onClick={() => handleEdit(subject)}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
             title="Edit Subject"
           >
             <Icon icon="mdi:pencil" className="w-4 h-4" />
           </button>
           <button 
+            onClick={() => handleDelete(subject.subjectId || subject.subject_id)}
             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
             title="Delete Subject"
           >
@@ -273,15 +368,24 @@ const Overview = () => {
                           </td>
                           <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-center space-x-2">
-                              <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer">
+                              <button 
+                                onClick={() => handleEditPackage(pkg)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                                title="Edit Package"
+                              >
                                 <Icon icon="mdi:pencil" className="w-4 h-4" />
                               </button>
-                              <button className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer">
+                              <button 
+                                onClick={() => handleDeletePackage(pkg.packageId)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                title="Delete Package"
+                              >
                                 <Icon icon="mdi:delete" className="w-4 h-4" />
                               </button>
                               <button 
                                 onClick={() => togglePackageExpansion(pkg.packageId)}
                                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                                title="Toggle Details"
                               >
                                 {expandedPackageId === pkg.packageId ? (
                                   <Icon icon="mdi:chevron-up" className="w-5 h-5" />
@@ -352,10 +456,22 @@ const Overview = () => {
         onClose={() => setIsAddPackageOpen(false)}
         onSuccess={fetchPackages}
       />
+      <EditPackageModal
+        isOpen={isEditPackageOpen}
+        onClose={() => setIsEditPackageOpen(false)}
+        onSuccess={fetchPackages}
+        packageData={selectedPackage}
+      />
       <AddSubjectModal
         isOpen={isAddSubjectOpen}
         onClose={() => setIsAddSubjectOpen(false)}
         onSuccess={fetchSubjects}
+      />
+      <EditSubjectModal
+        isOpen={isEditSubjectOpen}
+        onClose={() => setIsEditSubjectOpen(false)}
+        onSuccess={fetchSubjects}
+        subjectData={selectedSubject}
       />
     </div>
   );

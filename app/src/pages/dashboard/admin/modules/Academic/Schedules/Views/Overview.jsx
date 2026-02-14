@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import { toast } from 'react-toastify';
 import api from '../../../../../../../utils/api';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import AddScheduleModal from './AddScheduleModal';
@@ -37,7 +38,7 @@ const Overview = () => {
       setSchedules(response.data.data || []);
     } catch (error) {
       console.error('Error fetching schedules:', error);
-      alert('Gagal memuat jadwal pelajaran');
+      toast.error('Gagal memuat jadwal pelajaran');
     } finally {
       setLoading(false);
     }
@@ -114,7 +115,7 @@ const Overview = () => {
 
   const handleAddSchedule = () => {
     if (selectedClassId === 'all') {
-      alert('Silakan pilih kelas terlebih dahulu untuk menambah jadwal');
+      toast.warning('Silakan pilih kelas terlebih dahulu untuk menambah jadwal');
       return;
     }
     setIsModalOpen(true);

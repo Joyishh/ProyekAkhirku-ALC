@@ -3,6 +3,7 @@ import {
     getAllClasses, 
     createClass, 
     getClassById, 
+    updateClass,
     addStudentsToClass,
     deleteClass,
     getAvailableStudents,
@@ -20,6 +21,9 @@ router.post('/', authenticateToken, authUserRole([1]), createClass);
 
 // Get class details by ID (Admin & Teacher access)
 router.get('/:id', authenticateToken, authUserRole([1, 2]), getClassById);
+
+// Update class (Admin only)
+router.put('/:id', authenticateToken, authUserRole([1]), updateClass);
 
 // Add students to class (Admin only)
 router.post('/:id/members', authenticateToken, authUserRole([1]), addStudentsToClass);

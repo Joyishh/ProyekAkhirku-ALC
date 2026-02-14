@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react';
 import { toast } from 'react-toastify';
 import api from '../../../../../../../utils/api';
 
-const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
+const EditPackageModal = ({ isOpen, onClose, onSuccess, packageData }) => {
   const [formData, setFormData] = useState({
     packageName: '',
     description: '',
@@ -21,6 +21,25 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
       fetchSubjects();
     }
   }, [isOpen]);
+
+  // Populate form when packageData changes
+  useEffect(() => {
+    if (packageData) {
+      setFormData({
+        packageName: packageData.packageName || '',
+        description: packageData.description || '',
+        price: packageData.price?.toString() || ''
+      });
+
+      // Extract subject IDs from packageData.subjects array
+      if (packageData.subjects && Array.isArray(packageData.subjects)) {
+        const subjectIds = packageData.subjects.map(s => s.subjectId || s.subject_id).filter(Boolean);
+        setSelectedSubjectIds(subjectIds);
+      } else {
+        setSelectedSubjectIds([]);
+      }
+    }
+  }, [packageData]);
 
   const fetchSubjects = async () => {
     try {
@@ -80,34 +99,33 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
+    if (!packageData?.packageId) {
+      toast.error('ID paket tidak ditemukan');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const payload = {
         packageName: formData.packageName.trim(),
         description: formData.description.trim() || null,
         basePrice: priceValue, // Send as integer
-        isActive: true,
+        isActive: packageData.isActive !== undefined ? packageData.isActive : true,
         subjectIds: selectedSubjectIds // Array of integers
       };
 
-      const response = await api.post('/package/admin/', payload);
-      toast.success(response.data.message || 'Paket berhasil ditambahkan');
+      const response = await api.put(`/package/admin/${packageData.packageId}`, payload);
+      toast.success(response.data.message || 'Paket berhasil diperbarui');
 
-      // Reset form
-      setFormData({
-        packageName: '',
-        description: '',
-        price: ''
-      });
-      setSelectedSubjectIds([]);
+      // Reset search
       setSearchSubject('');
 
       // Call success callback and close modal
       if (onSuccess) onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating package:', error);
-      const errorMessage = error.response?.data?.message || 'Gagal menambahkan paket';
+      console.error('Error updating package:', error);
+      const errorMessage = error.response?.data?.message || 'Gagal memperbarui paket';
       toast.error(errorMessage);
     } finally {
       setSubmitting(false);
@@ -116,12 +134,6 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
 
   const handleClose = () => {
     if (!submitting) {
-      setFormData({
-        packageName: '',
-        description: '',
-        price: ''
-      });
-      setSelectedSubjectIds([]);
       setSearchSubject('');
       onClose();
     }
@@ -149,7 +161,7 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 flex items-center justify-between rounded-t-xl flex-shrink-0">
           <div className="flex items-center">
             <Icon icon="mdi:package-variant" className="w-6 h-6 text-white mr-3" />
-            <h3 className="text-lg font-bold text-white">Tambah Paket Belajar</h3>
+            <h3 className="text-lg font-bold text-white">Edit Paket Belajar</h3>
           </div>
           <button
             onClick={handleClose}
@@ -162,7 +174,7 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
 
         {/* Modal Body - Scrollable */}
         <div className="flex-1 overflow-y-auto px-6 py-6">
-          <form onSubmit={handleSubmit} className="space-y-5" id="packageForm">
+          <form onSubmit={handleSubmit} className="space-y-5" id="editPackageForm">
           {/* Package Name Input */}
           <div>
             <label htmlFor="packageName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -319,7 +331,7 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
           </button>
           <button
             type="submit"
-            form="packageForm"
+            form="editPackageForm"
             disabled={submitting}
             className={`flex items-center px-5 py-2.5 rounded-lg font-medium transition-all ${
               submitting 
@@ -335,7 +347,7 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
             ) : (
               <>
                 <Icon icon="mdi:check" className="w-5 h-5 mr-2" />
-                Simpan Paket
+                Simpan Perubahan
               </>
             )}
           </button>
@@ -345,4 +357,4 @@ const AddPackageModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-export default AddPackageModal;
+export default EditPackageModal;

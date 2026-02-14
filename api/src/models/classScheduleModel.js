@@ -3,7 +3,7 @@ import db from "../config/database.js";
 
 const { DataTypes } = Sequelize;
 
-const ClassSchedule = db.define('ClassSchedule', {
+const ClassSchedule = db.define('class_schedules', {
     scheduleId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -61,7 +61,7 @@ const ClassSchedule = db.define('ClassSchedule', {
         field: 'location_or_room'
     }
 }, {
-    tableName: 'class_schedule',
+    tableName: 'class_schedules',
     timestamps: true,
     underscored: true
 });

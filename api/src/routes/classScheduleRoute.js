@@ -1,5 +1,6 @@
 import express from 'express';
 import { 
+  getAllSchedules,
   getSchedulesByClass, 
   createSchedule, 
   deleteSchedule 
@@ -7,6 +8,7 @@ import {
 
 const router = express.Router();
 
+router.get('/', getAllSchedules);
 router.get('/class/:classId', getSchedulesByClass);
 router.post('/', createSchedule);
 router.delete('/:id', deleteSchedule);

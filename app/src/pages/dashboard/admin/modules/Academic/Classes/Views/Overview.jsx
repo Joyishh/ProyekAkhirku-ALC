@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import Swal from 'sweetalert2';
 import api from '../../../../../../../utils/api';
 import AddClassModal from './AddClassModal';
+import EditClassModal from './EditClassModal';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import DataTable from '../../../../../../../components/DataTable';
 
 const Overview = () => {
-  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch classes on component mount
@@ -28,6 +30,49 @@ const Overview = () => {
       // Ganti alert dengan console/toast di real app, tapi alert oke untuk debug
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle Edit Class
+  const handleEdit = (classItem) => {
+    setSelectedClass(classItem);
+    setIsEditModalOpen(true);
+  };
+
+  // Handle Delete Class
+  const handleDelete = async (classId) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Yakin hapus kelas ini?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3b82f6',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        await api.delete(`/classes/${classId}`);
+        
+        await Swal.fire({
+          title: 'Berhasil!',
+          text: 'Kelas berhasil dihapus.',
+          icon: 'success',
+          confirmButtonColor: '#3b82f6'
+        });
+        
+        fetchClasses();
+      }
+    } catch (error) {
+      console.error('Error deleting class:', error);
+      await Swal.fire({
+        title: 'Error!',
+        text: error.response?.data?.message || 'Gagal menghapus kelas.',
+        icon: 'error',
+        confirmButtonColor: '#3b82f6'
+      });
     }
   };
 
@@ -52,6 +97,7 @@ const Overview = () => {
     {
       header: 'Capacity',
       accessor: 'capacity',
+      align: 'center',
       render: (row) => (
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
           <Icon icon="mdi:account-group" className="w-3.5 h-3.5 mr-1" />
@@ -61,8 +107,8 @@ const Overview = () => {
     },
     {
       header: 'Filled',
-      accessor: 'members', // Ganti accessor biar lebih jelas (opsional)
-      // PERBAIKAN 1: Ganti 'cell' jadi 'render'
+      accessor: 'members',
+      align: 'center',
       render: (row) => {
         // Hitung total member (fallback ke 0 jika undefined)
         const total = row.totalMembers || row.members?.length || 0;
@@ -83,15 +129,13 @@ const Overview = () => {
     {
       header: 'Status',
       accessor: 'isActive',
-      // PERBAIKAN 2: Ganti 'cell' jadi 'render'
+      align: 'center',
       render: (row) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          // Cek boolean secara langsung, jangan pakai string 'true'
           row.isActive 
             ? 'bg-green-100 text-green-800' 
             : 'bg-gray-100 text-gray-800'
         }`}>
-          {/* PERBAIKAN 3: Konversi boolean ke teks */}
           {row.isActive ? 'Active' : 'Inactive'}
         </span>
       ),
@@ -99,15 +143,24 @@ const Overview = () => {
     {
       header: 'Action',
       accessor: 'action',
-      // PERBAIKAN 4: Ganti 'cell' jadi 'render'
+      align: 'center',
       render: (row) => (
-        <button
-          onClick={() => navigate(`/dashboard/admin/academic/classes/${row.classId}`)}
-          className="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-md transition-colors shadow-sm"
-        >
-          <Icon icon="mdi:eye" className="w-3.5 h-3.5 mr-1" />
-          Detail
-        </button>
+        <div className="flex items-center justify-center space-x-2">
+          <button
+            onClick={() => handleEdit(row)}
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+            title="Edit Class"
+          >
+            <Icon icon="mdi:pencil" className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDelete(row.classId)}
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            title="Delete Class"
+          >
+            <Icon icon="mdi:delete" className="w-4 h-4" />
+          </button>
+        </div>
       ),
     },
   ];
@@ -147,6 +200,14 @@ const Overview = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchClasses}
+      />
+
+      {/* Edit Class Modal */}
+      <EditClassModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={fetchClasses}
+        classData={selectedClass}
       />
     </div>
   );

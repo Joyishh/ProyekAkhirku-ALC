@@ -158,20 +158,63 @@ export const getPackageById = async (req, res) => {
 
 export const updatePackage = async (req, res) =>{
     const { packageId } = req.params
-    const { packageName, description, basePrice, isActive} = req.body
+    const { packageName, description, basePrice, isActive, subjectIds } = req.body
     try{
         const packages = await Package.findByPk(packageId)
         if(!packages){
             return res.status(404).json({ success: false, message: 'Paket tidak ditemukan.' });
         }
 
+        // Update package basic info
         packages.packageName = packageName || packages.packageName
         packages.description = description === undefined ? packages.description : description;
         packages.basePrice = basePrice === undefined ? packages.basePrice : basePrice;
         packages.isActive = isActive === undefined ? packages.isActive : isActive;
 
         await packages.save()
-        res.status(200).json({ success:true, message:'Paket berhasil diperbarui', data: packages})
+
+        // Update package items (subjects) if subjectIds provided
+        if (subjectIds && Array.isArray(subjectIds)) {
+            // Verify all subjects exist
+            const subjects = await Subject.findAll({
+                where: {
+                    subjectId: subjectIds
+                }
+            });
+
+            if (subjects.length !== subjectIds.length) {
+                return res.status(404).json({ success: false, message: 'Satu atau lebih mata pelajaran tidak ditemukan.' });
+            }
+
+            // Delete existing package items
+            await PackageItem.destroy({
+                where: { packageId: packageId }
+            });
+
+            // Create new package items
+            const packageItemsData = subjectIds.map(subjectId => ({
+                packageId: packageId,
+                subjectId: subjectId,
+                numberOfMeets: '0',
+                levelSpecific: null
+            }));
+
+            await PackageItem.bulkCreate(packageItemsData);
+        }
+
+        // Fetch updated package with subjects
+        const updatedPackage = await Package.findByPk(packageId, {
+            include: [{
+                model: PackageItem,
+                as: 'packageItems',
+                include: [{
+                    model: Subject,
+                    as: 'subjectDetails',
+                }],
+            }],
+        });
+
+        res.status(200).json({ success:true, message:'Paket berhasil diperbarui', data: updatedPackage})
     } catch(error) {
         if (error.name === 'SequelizeUniqueConstraintError') {
         return res.status(409).json({ success: false, message: 'Nama paket sudah ada.' });

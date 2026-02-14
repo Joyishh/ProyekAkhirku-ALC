@@ -1,6 +1,42 @@
 import ClassSchedule from '../models/classScheduleModel.js';
 import Subject from '../models/subjectModel.js';
 import Teacher from '../models/teacherModel.js';
+import Class from '../models/classModel.js';
+
+export const getAllSchedules = async (req, res) => {
+  try {
+    const schedules = await ClassSchedule.findAll({
+      include: [
+        {
+          model: Subject,
+          as: 'subject'
+        },
+        {
+          model: Teacher,
+          as: 'teacher'
+        },
+        {
+          model: Class,
+          as: 'class',
+          attributes: ['classId', 'className']
+        }
+      ],
+      order: [['dayOfWeek', 'ASC'], ['startTime', 'ASC']]
+    });
+    
+    res.status(200).json({ 
+      success: true,
+      data: schedules 
+    });
+  } catch (error) {
+    console.error('Error fetching all schedules:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching schedules', 
+      error: error.message 
+    });
+  }
+};
 
 export const getSchedulesByClass = async (req, res) => {
   try {

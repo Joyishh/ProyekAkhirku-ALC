@@ -87,7 +87,7 @@ export const createClass = async (req, res) => {
       packageId: package_id,
       className: class_name,
       capacity: capacity || 30,
-      isActive: "active",
+      isActive: true,
     });
 
     // Fetch the created class with package info
@@ -412,10 +412,100 @@ export const addStudentsToClass = async (req, res) => {
   }
 };
 
+/**
+ * Update Class
+ * Updates class information (name, package, capacity, status)
+ */
+export const updateClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { class_name, package_id, capacity, is_active } = req.body;
+
+    // Find the class
+    const classData = await Class.findByPk(id);
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: "Kelas tidak ditemukan"
+      });
+    }
+
+    // Validate package if being updated
+    if (package_id) {
+      const packageExists = await Package.findByPk(package_id);
+      if (!packageExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Paket tidak ditemukan"
+        });
+      }
+    }
+
+    // Validate capacity if being updated
+    if (capacity !== undefined) {
+      if (capacity < 1) {
+        return res.status(400).json({
+          success: false,
+          message: "Kapasitas minimal 1"
+        });
+      }
+
+      // Check current enrollment
+      const memberCount = await ClassMember.count({ where: { classId: id } });
+      if (capacity < memberCount) {
+        return res.status(400).json({
+          success: false,
+          message: `Kapasitas tidak boleh kurang dari jumlah siswa saat ini (${memberCount})`
+        });
+      }
+    }
+
+    // Update class data
+    if (class_name) classData.className = class_name;
+    if (package_id) classData.packageId = package_id;
+    if (capacity !== undefined) classData.capacity = capacity;
+    if (is_active !== undefined) classData.isActive = is_active;
+
+    await classData.save();
+
+    // Fetch updated class with package info
+    const updatedClass = await Class.findByPk(id, {
+      include: [{
+        model: Package,
+        as: "package",
+        attributes: ["packageId", "packageName"]
+      }]
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Kelas berhasil diperbarui",
+      data: updatedClass
+    });
+
+  } catch (error) {
+    console.error("Update class error:", error);
+
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      return res.status(400).json({
+        success: false,
+        message: "Nama kelas sudah digunakan"
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "Terjadi kesalahan saat memperbarui kelas",
+      error: error.message
+    });
+  }
+};
+
 export const deleteClass = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Find the class
         const classData = await Class.findByPk(id);
         if (!classData) {
             return res.status(404).json({
@@ -424,22 +514,34 @@ export const deleteClass = async (req, res) => {
             });
         }
 
-        const memberCount = await ClassMember.count({ where: { classId: id } });
-        if (memberCount > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Gagal menghapus. Kelas masih memiliki ${memberCount} siswa terdaftar.`
-            });
+        // Check for class members
+        try {
+            const memberCount = await ClassMember.count({ where: { classId: id } });
+            if (memberCount > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Gagal menghapus. Kelas masih memiliki ${memberCount} siswa terdaftar.`
+                });
+            }
+        } catch (memberError) {
+            console.error("Error checking class members:", memberError);
         }
 
-        const scheduleCount = await ClassSchedule.count({ where: { classId: id } });
-        if (scheduleCount > 0) {
-            return res.status(400).json({
-                success: false,
-                message: `Gagal menghapus. Kelas masih memiliki ${scheduleCount} jadwal aktif.`
-            });
+        // Check for class schedules (optional, skip if model has issues)
+        try {
+            const scheduleCount = await ClassSchedule.count({ where: { classId: id } });
+            if (scheduleCount > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Gagal menghapus. Kelas masih memiliki ${scheduleCount} jadwal aktif.`
+                });
+            }
+        } catch (scheduleError) {
+            console.error("Error checking class schedules:", scheduleError);
+            // Continue with deletion if schedule check fails
         }
 
+        // Delete the class
         await classData.destroy();
 
         return res.status(200).json({
@@ -449,6 +551,20 @@ export const deleteClass = async (req, res) => {
 
     } catch (error) {
         console.error("Delete class error:", error);
+        console.error("Error details:", {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        
+        // Handle specific Sequelize errors
+        if (error.name === 'SequelizeForeignKeyConstraintError') {
+            return res.status(400).json({
+                success: false,
+                message: "Tidak dapat menghapus kelas karena masih terkait dengan data lain."
+            });
+        }
+
         return res.status(500).json({
             success: false,
             message: "Terjadi kesalahan saat menghapus kelas",
