@@ -3,6 +3,7 @@ import Users from "../models/userModel.js";
 import StudentParent from "../models/studentParentModel.js";
 import StudentEnrollment from "../models/studentEnrollmentModel.js";
 import Package from "../models/packageModel.js";
+import ClassMember from "../models/classMemberModel.js";
 import db from "../config/database.js";
 
 /**
@@ -276,6 +277,75 @@ export const updateStudent = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Terjadi kesalahan saat memperbarui data siswa",
+            error: error.message
+        });
+    }
+};
+
+/**
+ * Get Available Students for a Package (Not yet in specific class)
+ * Used for "Add Student to Class" modal
+ * GET /students/available?packageId=X&classId=Y
+ */
+export const getAvailableStudents = async (req, res) => {
+    try {
+        const { packageId, classId } = req.query;
+
+        if (!packageId) {
+            return res.status(400).json({
+                success: false,
+                message: "packageId is required"
+            });
+        }
+
+        // Find all students enrolled in this package
+        const enrollments = await StudentEnrollment.findAll({
+            where: {
+                packageId: parseInt(packageId),
+                status: 'aktif'
+            },
+            include: [
+                {
+                    model: Student,
+                    as: 'student',
+                    attributes: ['studentId', 'fullname'],
+                    required: true
+                }
+            ],
+            attributes: ['enrollmentId', 'studentId']
+        });
+
+        // Get student IDs already in the target class (if classId provided)
+        let existingMemberIds = [];
+        if (classId) {
+            const existingMembers = await ClassMember.findAll({
+                where: { classId: parseInt(classId) },
+                attributes: ['studentId']
+            });
+            existingMemberIds = existingMembers.map(m => m.studentId);
+        }
+
+        // Filter out students already in the class
+        const availableStudents = enrollments
+            .filter(enrollment => !existingMemberIds.includes(enrollment.studentId))
+            .map(enrollment => ({
+                studentId: enrollment.student.studentId,
+                fullname: enrollment.student.fullname,
+                studentIdFormatted: `STD${String(enrollment.student.studentId).padStart(3, '0')}`,
+                enrollmentId: enrollment.enrollmentId
+            }));
+
+        return res.status(200).json({
+            success: true,
+            data: availableStudents,
+            count: availableStudents.length
+        });
+
+    } catch (error) {
+        console.error("Get available students error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Terjadi kesalahan saat mengambil data siswa tersedia",
             error: error.message
         });
     }

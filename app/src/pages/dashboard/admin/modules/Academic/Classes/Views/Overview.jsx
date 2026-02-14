@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import Swal from 'sweetalert2';
 import api from '../../../../../../../utils/api';
 import AddClassModal from './AddClassModal';
-import EditClassModal from './EditClassModal';
 import ModuleHeader from '../../../../../../../components/ModuleHeader';
 import DataTable from '../../../../../../../components/DataTable';
 
 const Overview = () => {
+  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch classes on component mount
@@ -27,52 +25,8 @@ const Overview = () => {
       setClasses(response.data.data || []);
     } catch (error) {
       console.error('Error fetching classes:', error);
-      // Ganti alert dengan console/toast di real app, tapi alert oke untuk debug
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Handle Edit Class
-  const handleEdit = (classItem) => {
-    setSelectedClass(classItem);
-    setIsEditModalOpen(true);
-  };
-
-  // Handle Delete Class
-  const handleDelete = async (classId) => {
-    try {
-      const result = await Swal.fire({
-        title: 'Yakin hapus kelas ini?',
-        text: "Data yang dihapus tidak dapat dikembalikan!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3b82f6',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-      });
-
-      if (result.isConfirmed) {
-        await api.delete(`/classes/${classId}`);
-        
-        await Swal.fire({
-          title: 'Berhasil!',
-          text: 'Kelas berhasil dihapus.',
-          icon: 'success',
-          confirmButtonColor: '#3b82f6'
-        });
-        
-        fetchClasses();
-      }
-    } catch (error) {
-      console.error('Error deleting class:', error);
-      await Swal.fire({
-        title: 'Error!',
-        text: error.response?.data?.message || 'Gagal menghapus kelas.',
-        icon: 'error',
-        confirmButtonColor: '#3b82f6'
-      });
     }
   };
 
@@ -145,22 +99,14 @@ const Overview = () => {
       accessor: 'action',
       align: 'center',
       render: (row) => (
-        <div className="flex items-center justify-center space-x-2">
-          <button
-            onClick={() => handleEdit(row)}
-            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-            title="Edit Class"
-          >
-            <Icon icon="mdi:pencil" className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleDelete(row.classId)}
-            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-            title="Delete Class"
-          >
-            <Icon icon="mdi:delete" className="w-4 h-4" />
-          </button>
-        </div>
+        <button
+          onClick={() => navigate(`/dashboard/admin/academic/classes/${row.classId}`)}
+          className="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors cursor-pointer"
+          title="View Detail"
+        >
+          <Icon icon="mdi:eye" className="w-4 h-4 mr-1.5" />
+          View Details
+        </button>
       ),
     },
   ];
@@ -200,14 +146,6 @@ const Overview = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSuccess={fetchClasses}
-      />
-
-      {/* Edit Class Modal */}
-      <EditClassModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSuccess={fetchClasses}
-        classData={selectedClass}
       />
     </div>
   );

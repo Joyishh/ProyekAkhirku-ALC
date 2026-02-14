@@ -50,6 +50,7 @@ function App() {
         <Route path="academic" element={<AcademicModule />}>
           <Route index element={<Navigate to="classes" replace />} />
           <Route path="classes" element={<ClassesModule />} />
+          <Route path="classes/:id" element={<ClassesModule />} />
           <Route path="schedules" element={<SchedulesModule />} />
           <Route path="curriculum" element={<CurriculumModule />} />
         </Route>

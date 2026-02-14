@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import ClassesOverview from './Views/Overview';
+import ClassDetail from './Views/ClassDetail';
 
 const ClassesModule = () => {
   const { id } = useParams();
@@ -10,7 +11,7 @@ const ClassesModule = () => {
   // Jika tidak, render Overview (Tabel)
   return (
     <>
-      <ClassesOverview />
+      {id ? <ClassDetail /> : <ClassesOverview />}
     </>
   );
 };

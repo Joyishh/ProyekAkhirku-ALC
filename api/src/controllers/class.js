@@ -4,6 +4,7 @@ import Package from "../models/packageModel.js";
 import ClassMember from "../models/classMemberModel.js";
 import ClassSchedule from "../models/classScheduleModel.js";
 import Student from "../models/studentModel.js";
+import StudentEnrollment from "../models/studentEnrollmentModel.js";
 import { Op } from "sequelize";
 
 /**
@@ -301,7 +302,7 @@ export const addStudentsToClass = async (req, res) => {
         where: {
             studentId: student_ids,
             packageId: classExists.packageId,
-            isActive: 'active'
+            status: 'aktif'
         },
         attributes: ['studentId', 'enrollmentId'],
         transaction: t
